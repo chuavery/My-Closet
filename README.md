@@ -21,7 +21,7 @@ My Closet solves three connected problems: knowing what you own, knowing where i
 | Layer                 | Choice                                                     |
 | --------------------- | ---------------------------------------------------------- |
 | Mobile app            | React Native + Expo                                        |
-| Local database        | WatermelonDB or Expo SQLite (Drizzle ORM)                  |
+| Local database        | WatermelonDB               |
 | Image storage         | On-device sandboxed file storage                           |
 | Auth                  | None in v1 — accounts arrive with cloud sync (see Roadmap) |
 | On-device AI (future) | Core ML / TensorFlow Lite, fetched on first use            |
