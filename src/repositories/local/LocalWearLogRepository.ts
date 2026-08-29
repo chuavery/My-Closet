@@ -10,7 +10,7 @@ function mapToWearLog(model: WearLogModel): WearLog {
     articleId: model.article?.id ?? null,
     outfitId: model.outfit?.id ?? null,
     wornDate: model.wornDate,
-    createdAt: model.createdAt,
+    createdAt: new Date((model._raw as any).created_at * 1000).toISOString(),
   };
 }
 
@@ -23,7 +23,6 @@ export class LocalWearLogRepository implements WearLogRepository {
     const model = await this.collection.create((rec) => {
       rec.article.id = articleId;
       rec.wornDate = new Date().toISOString().split('T')[0];
-      rec.createdAt = new Date().toISOString();
     });
     return mapToWearLog(model);
   }
@@ -32,7 +31,6 @@ export class LocalWearLogRepository implements WearLogRepository {
     const model = await this.collection.create((rec) => {
       rec.outfit.id = outfitId;
       rec.wornDate = new Date().toISOString().split('T')[0];
-      rec.createdAt = new Date().toISOString();
     });
     return mapToWearLog(model);
   }

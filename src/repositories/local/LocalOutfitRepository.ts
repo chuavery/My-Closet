@@ -12,7 +12,7 @@ function mapToOutfit(model: OutfitModel): Outfit {
     name: model.name,
     wearCount: model.wearCount,
     lastWornAt: model.lastWornAt ?? null,
-    createdAt: model.createdAt,
+    createdAt: new Date((model._raw as any).created_at * 1000).toISOString(),
   };
 }
 
@@ -54,7 +54,6 @@ export class LocalOutfitRepository implements OutfitRepository {
     const model = await this.collection.create((rec) => {
       rec.name = outfit.name;
       rec.wearCount = 0;
-      rec.createdAt = new Date().toISOString();
     });
     return mapToOutfit(model);
   }
