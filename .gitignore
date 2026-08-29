@@ -1,3 +1,27 @@
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native build artifacts
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+ios/
+android/
+
+# Metro bundler
+.metro-health-check*
+
+# macOS
+.DS_Store
+
+# Env
+.env*.local
+
 # Logs
 logs
 *.log
