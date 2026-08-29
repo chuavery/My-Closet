@@ -1,7 +1,7 @@
 import { Q } from '@nozbe/watermelondb';
 import { Article } from '@/models/Article';
 import { ArticleRepository } from '@/repositories/interfaces/ArticleRepository';
-import { database } from '@/lib/watermelon/database';
+import { getDatabase } from '@/lib/watermelon/database';
 import { ArticleModel } from '@/lib/watermelon/models/ArticleModel';
 
 function mapToArticle(model: ArticleModel): Article {
@@ -26,7 +26,7 @@ function mapToArticle(model: ArticleModel): Article {
 
 export class LocalArticleRepository implements ArticleRepository {
   private get collection() {
-    return database.get<ArticleModel>('articles');
+    return getDatabase().get<ArticleModel>('articles');
   }
 
   async getAll(): Promise<Article[]> {
@@ -111,7 +111,7 @@ export class LocalArticleRepository implements ArticleRepository {
   }
 
   async getByTag(tagId: string): Promise<Article[]> {
-    const articleTags = database.get('article_tags');
+    const articleTags = getDatabase().get('article_tags');
     const links = await articleTags
       .query(Q.where('tag_id', tagId))
       .fetch();

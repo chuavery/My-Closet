@@ -1,7 +1,7 @@
 import { Q } from '@nozbe/watermelondb';
 import { StorageSpace } from '@/models/StorageSpace';
 import { StorageSpaceRepository } from '@/repositories/interfaces/StorageSpaceRepository';
-import { database } from '@/lib/watermelon/database';
+import { getDatabase } from '@/lib/watermelon/database';
 import { StorageSpaceModel } from '@/lib/watermelon/models/StorageSpaceModel';
 
 function mapToStorageSpace(model: StorageSpaceModel): StorageSpace {
@@ -16,7 +16,7 @@ function mapToStorageSpace(model: StorageSpaceModel): StorageSpace {
 
 export class LocalStorageSpaceRepository implements StorageSpaceRepository {
   private get collection() {
-    return database.get<StorageSpaceModel>('storage_spaces');
+    return getDatabase().get<StorageSpaceModel>('storage_spaces');
   }
 
   async getAll(): Promise<StorageSpace[]> {
@@ -61,7 +61,7 @@ export class LocalStorageSpaceRepository implements StorageSpaceRepository {
   }
 
   async delete(id: string): Promise<void> {
-    const articles = database.get('articles');
+    const articles = getDatabase().get('articles');
     const orphans = await articles
       .query(Q.where('storage_space_id', id))
       .fetch();

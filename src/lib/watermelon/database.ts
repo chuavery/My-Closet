@@ -11,25 +11,32 @@ import { OutfitTagModel } from './models/OutfitTagModel';
 import { WearLogModel } from './models/WearLogModel';
 import { UserSettingsModel } from './models/UserSettingsModel';
 
-const adapter = new SQLiteAdapter({
-  schema,
-  jsi: true,
-  onSetUpError: (error) => {
-    console.error('Database setup error:', error);
-  },
-});
+let _database: Database | null = null;
 
-export const database = new Database({
-  adapter,
-  modelClasses: [
-    ArticleModel,
-    StorageSpaceModel,
-    OutfitModel,
-    OutfitArticleModel,
-    TagModel,
-    ArticleTagModel,
-    OutfitTagModel,
-    WearLogModel,
-    UserSettingsModel,
-  ],
-});
+export function getDatabase(): Database {
+  if (!_database) {
+    const adapter = new SQLiteAdapter({
+      schema,
+      jsi: false,
+      onSetUpError: (error) => {
+        console.error('Database setup error:', error);
+      },
+    });
+
+    _database = new Database({
+      adapter,
+      modelClasses: [
+        ArticleModel,
+        StorageSpaceModel,
+        OutfitModel,
+        OutfitArticleModel,
+        TagModel,
+        ArticleTagModel,
+        OutfitTagModel,
+        WearLogModel,
+        UserSettingsModel,
+      ],
+    });
+  }
+  return _database;
+}

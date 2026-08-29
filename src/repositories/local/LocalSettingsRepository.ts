@@ -1,11 +1,11 @@
 import { UserSettings } from '@/models/UserSettings';
 import { SettingsRepository } from '@/repositories/interfaces/SettingsRepository';
-import { database } from '@/lib/watermelon/database';
+import { getDatabase } from '@/lib/watermelon/database';
 import { UserSettingsModel } from '@/lib/watermelon/models/UserSettingsModel';
 
 export class LocalSettingsRepository implements SettingsRepository {
   private get collection() {
-    return database.get<UserSettingsModel>('user_settings');
+    return getDatabase().get<UserSettingsModel>('user_settings');
   }
 
   async get(): Promise<UserSettings> {

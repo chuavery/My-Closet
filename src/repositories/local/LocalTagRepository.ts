@@ -1,7 +1,7 @@
 import { Q } from '@nozbe/watermelondb';
 import { Tag, TagCategory } from '@/models/Tag';
 import { TagRepository } from '@/repositories/interfaces/TagRepository';
-import { database } from '@/lib/watermelon/database';
+import { getDatabase } from '@/lib/watermelon/database';
 import { TagModel } from '@/lib/watermelon/models/TagModel';
 import { ArticleTagModel } from '@/lib/watermelon/models/ArticleTagModel';
 import { OutfitTagModel } from '@/lib/watermelon/models/OutfitTagModel';
@@ -16,15 +16,15 @@ function mapToTag(model: TagModel): Tag {
 
 export class LocalTagRepository implements TagRepository {
   private get collection() {
-    return database.get<TagModel>('tags');
+    return getDatabase().get<TagModel>('tags');
   }
 
   private get articleTags() {
-    return database.get<ArticleTagModel>('article_tags');
+    return getDatabase().get<ArticleTagModel>('article_tags');
   }
 
   private get outfitTags() {
-    return database.get<OutfitTagModel>('outfit_tags');
+    return getDatabase().get<OutfitTagModel>('outfit_tags');
   }
 
   async getAll(): Promise<Tag[]> {

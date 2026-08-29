@@ -1,7 +1,7 @@
 import { Q } from '@nozbe/watermelondb';
 import { WearLog } from '@/models/WearLog';
 import { WearLogRepository } from '@/repositories/interfaces/WearLogRepository';
-import { database } from '@/lib/watermelon/database';
+import { getDatabase } from '@/lib/watermelon/database';
 import { WearLogModel } from '@/lib/watermelon/models/WearLogModel';
 
 function mapToWearLog(model: WearLogModel): WearLog {
@@ -16,7 +16,7 @@ function mapToWearLog(model: WearLogModel): WearLog {
 
 export class LocalWearLogRepository implements WearLogRepository {
   private get collection() {
-    return database.get<WearLogModel>('wear_logs');
+    return getDatabase().get<WearLogModel>('wear_logs');
   }
 
   async logArticleWorn(articleId: string): Promise<WearLog> {

@@ -2,7 +2,7 @@ import { Q } from '@nozbe/watermelondb';
 import { Outfit } from '@/models/Outfit';
 import { OutfitArticle, LayerType } from '@/models/OutfitArticle';
 import { OutfitRepository } from '@/repositories/interfaces/OutfitRepository';
-import { database } from '@/lib/watermelon/database';
+import { getDatabase } from '@/lib/watermelon/database';
 import { OutfitModel } from '@/lib/watermelon/models/OutfitModel';
 import { OutfitArticleModel } from '@/lib/watermelon/models/OutfitArticleModel';
 
@@ -27,11 +27,11 @@ function mapToOutfitArticle(model: OutfitArticleModel): OutfitArticle {
 
 export class LocalOutfitRepository implements OutfitRepository {
   private get collection() {
-    return database.get<OutfitModel>('outfits');
+    return getDatabase().get<OutfitModel>('outfits');
   }
 
   private get outfitArticles() {
-    return database.get<OutfitArticleModel>('outfit_articles');
+    return getDatabase().get<OutfitArticleModel>('outfit_articles');
   }
 
   async getAll(): Promise<Outfit[]> {
