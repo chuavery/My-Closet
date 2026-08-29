@@ -1,0 +1,95 @@
+%% v1 is a fully offline, single-device app: all records live in an on-device
+%% database (no server), and "user_id" below is a local device/profile id
+%% rather than an authenticated account. See PRD Section 6 (Offline-First
+%% Architecture) for sync/backup implications.
+erDiagram
+    USER ||--o{ ARTICLE : owns
+    USER ||--o{ STORAGE_SPACE : owns
+    USER ||--o{ OUTFIT : owns
+    USER ||--|| USER_SETTINGS : has
+
+    USER_SETTINGS {
+        uuid user_id PK_FK
+        boolean wear_history_enabled "default false"
+    }
+
+    STORAGE_SPACE ||--o{ ARTICLE : contains
+
+    STORAGE_SPACE {
+        uuid id PK
+        uuid user_id FK
+        string name "e.g. Bedroom Closet"
+        string sub_location "optional, freeform - e.g. Top Shelf, Cabinet 2 (v1: one level, not structured)"
+        string qr_code_value
+        datetime created_at
+    }
+
+    ARTICLE ||--o{ ARTICLE_TAG : has
+    ARTICLE ||--o{ OUTFIT_ARTICLE : "used in"
+    ARTICLE ||--o{ WEAR_LOG : logs
+
+    ARTICLE {
+        uuid id PK
+        uuid user_id FK
+        uuid storage_space_id FK "nullable, auto-set null (orphaned) if space is deleted"
+        string name "optional"
+        string brand "optional"
+        enum article_type "shirt, jacket, dress, etc - required"
+        enum color "controlled list: red, orange, yellow, green, blue, indigo, violet, pink, white, brown, black"
+        string fabric_type "optional"
+        string fit "optional"
+        string size "optional"
+        string original_image_url
+        string processed_image_url
+        enum source "manual | ai_suggested"
+        int wear_count "default 0, only used if enabled"
+        datetime last_worn_at "nullable"
+        datetime created_at
+    }
+
+    TAG ||--o{ ARTICLE_TAG : "applied via"
+    TAG ||--o{ OUTFIT_TAG : "applied via"
+
+    TAG {
+        uuid id PK
+        string name "e.g. casual, formal, rainy-weather"
+        enum category "theme_occasion | custom"
+    }
+
+    ARTICLE_TAG {
+        uuid article_id FK
+        uuid tag_id FK
+    }
+
+    OUTFIT ||--o{ OUTFIT_ARTICLE : "composed of"
+    OUTFIT ||--o{ OUTFIT_TAG : has
+    OUTFIT ||--o{ WEAR_LOG : logs
+
+    OUTFIT {
+        uuid id PK
+        uuid user_id FK
+        string name
+        int wear_count "default 0, only used if enabled"
+        datetime last_worn_at "nullable"
+        datetime created_at
+    }
+
+    OUTFIT_ARTICLE {
+        uuid outfit_id FK
+        uuid article_id FK
+        enum layer_type "base | mid | outer | bottom | footwear | accessory"
+        int z_index "stacking order for layering view"
+    }
+
+    OUTFIT_TAG {
+        uuid outfit_id FK
+        uuid tag_id FK
+    }
+
+    WEAR_LOG {
+        uuid id PK
+        uuid article_id FK "nullable if pure outfit log w/ cascade rows below"
+        uuid outfit_id FK "nullable, set when logged via an outfit"
+        date worn_date
+        datetime created_at
+    }
