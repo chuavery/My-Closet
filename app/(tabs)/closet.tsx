@@ -86,6 +86,7 @@ export default function ClosetScreen() {
                     item: { id: string; [key: string]: any };
                 }) => (
                     <ArticleCard
+                        // FIX: TypeScript error: Type '{ id: string; [key: string]: any; }' is not assignable to type 'Article'.
                         article={item}
                         onPress={() => router.push(`/article/${item.id}`)}
                     />

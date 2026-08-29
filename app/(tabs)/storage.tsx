@@ -49,6 +49,7 @@ export default function StorageScreen() {
                 contentContainerStyle={styles.list}
                 renderItem={({ item }: { item: { id: string } }) => (
                     <StorageSpaceRow
+                        // FIX: TypeScript error: Type '{ id: string; [key: string]: any; }' is not assignable to type 'StorageSpace'.
                         space={item}
                         articleCount={(articlesBySpace[item.id] ?? []).length}
                         onPress={() => router.push(`/storage/${item.id}`)}

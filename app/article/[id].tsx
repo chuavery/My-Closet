@@ -7,7 +7,7 @@ import {
     StyleSheet,
     ActivityIndicator,
     Alert,
-    Pressable,
+    Pressable
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useArticleForm } from "@/viewmodels/useArticleForm";
