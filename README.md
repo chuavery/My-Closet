@@ -48,15 +48,10 @@ The codebase follows **MVVM (Model–View–ViewModel)** with a repository layer
 ## Getting Started
 
 ```bash
-# clone the repo
 git clone <repo-url>
 cd my-closet
-
-# install dependencies
 npm install
-
-# start the Expo dev server
-npx expo start
+npm start
 ```
 
 Requires [Node.js](https://nodejs.org/) and the [Expo Go](https://expo.dev/client) app (or a simulator) for local development.
@@ -78,3 +73,18 @@ Requires [Node.js](https://nodejs.org/) and the [Expo Go](https://expo.dev/clien
 -   `docs/My_Closet_PRD.docx` — full product requirements document
 -   `docs/my-closet-er-diagram.mermaid` — entity-relationship diagram
 -   `docs/My_Closet_Wireframes.html` — core screen wireframes
+
+## Progress Log
+
+**08/30/2026 3:24 AM**
+✅ ACCOMPLISHED
+
+-   Closet Browsing
+-   Article Storage (without image input)
+-   Outfit Builder
+-   Storage Locator (without QR Scanner/Generator)
+
+🖊 NEXT IN PROGRESS
+
+-   Image upload/capture for Article Storage
+-   QR Generator & Scanner
