@@ -1,7 +1,7 @@
 import { appSchema, tableSchema } from '@nozbe/watermelondb';
 
 export const schema = appSchema({
-  version: 1,
+  version: 2,
   tables: [
     tableSchema({
       name: 'articles',
@@ -19,7 +19,6 @@ export const schema = appSchema({
         { name: 'source', type: 'string' },
         { name: 'wear_count', type: 'number' },
         { name: 'last_worn_at', type: 'string', isOptional: true },
-        { name: 'created_at', type: 'string' },
       ],
     }),
     tableSchema({
@@ -28,7 +27,6 @@ export const schema = appSchema({
         { name: 'name', type: 'string' },
         { name: 'sub_location', type: 'string', isOptional: true },
         { name: 'qr_code_value', type: 'string' },
-        { name: 'created_at', type: 'string' },
       ],
     }),
     tableSchema({
@@ -37,7 +35,6 @@ export const schema = appSchema({
         { name: 'name', type: 'string' },
         { name: 'wear_count', type: 'number' },
         { name: 'last_worn_at', type: 'string', isOptional: true },
-        { name: 'created_at', type: 'string' },
       ],
     }),
     tableSchema({
@@ -76,7 +73,6 @@ export const schema = appSchema({
         { name: 'article_id', type: 'string', isOptional: true, isIndexed: true },
         { name: 'outfit_id', type: 'string', isOptional: true, isIndexed: true },
         { name: 'worn_date', type: 'string' },
-        { name: 'created_at', type: 'string' },
       ],
     }),
     tableSchema({

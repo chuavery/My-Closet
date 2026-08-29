@@ -30,5 +30,4 @@ export class ArticleModel extends Model {
     @field("source") source!: string;
     @field("wear_count") wearCount!: number;
     @field("last_worn_at") lastWornAt?: string;
-    @field("created_at") createdAt!: string;
 }

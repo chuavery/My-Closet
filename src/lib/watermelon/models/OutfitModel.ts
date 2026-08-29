@@ -13,7 +13,6 @@ export class OutfitModel extends Model {
     @field("name") name!: string;
     @field("wear_count") wearCount!: number;
     @field("last_worn_at") lastWornAt?: string;
-    @field("created_at") createdAt!: string;
 
     @children("outfit_articles") outfitArticles: any;
     @children("outfit_tags") outfitTags: any;

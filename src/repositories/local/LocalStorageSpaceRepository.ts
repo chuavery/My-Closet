@@ -10,7 +10,7 @@ function mapToStorageSpace(model: StorageSpaceModel): StorageSpace {
     name: model.name,
     subLocation: model.subLocation,
     qrCodeValue: model.qrCodeValue,
-    createdAt: model.createdAt,
+    createdAt: new Date((model._raw as any).created_at * 1000).toISOString(),
   };
 }
 
@@ -47,7 +47,6 @@ export class LocalStorageSpaceRepository implements StorageSpaceRepository {
       rec.name = space.name;
       rec.subLocation = space.subLocation;
       rec.qrCodeValue = space.qrCodeValue;
-      rec.createdAt = new Date().toISOString();
     });
     return mapToStorageSpace(model);
   }

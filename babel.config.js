@@ -11,12 +11,6 @@ module.exports = function (api) {
           },
         },
       ],
-      [
-        '@nozbe/watermelondb/babel',
-        {
-          dataMigrator: './src/lib/watermelon/migrations.ts',
-        },
-      ],
     ],
   };
 };

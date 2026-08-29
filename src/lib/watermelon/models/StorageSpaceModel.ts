@@ -11,7 +11,6 @@ export class StorageSpaceModel extends Model {
     @field("name") name!: string;
     @field("sub_location") subLocation?: string;
     @field("qr_code_value") qrCodeValue!: string;
-    @field("created_at") createdAt!: string;
 
     @children("articles") articles: any;
 }

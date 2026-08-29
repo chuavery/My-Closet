@@ -20,7 +20,7 @@ function mapToArticle(model: ArticleModel): Article {
     source: model.source as Article['source'],
     wearCount: model.wearCount,
     lastWornAt: model.lastWornAt ?? null,
-    createdAt: model.createdAt,
+    createdAt: new Date((model._raw as any).created_at * 1000).toISOString(),
   };
 }
 
@@ -58,7 +58,6 @@ export class LocalArticleRepository implements ArticleRepository {
       rec.processedImageUrl = article.processedImageUrl;
       rec.source = article.source;
       rec.wearCount = 0;
-      rec.createdAt = new Date().toISOString();
     });
     return mapToArticle(model);
   }

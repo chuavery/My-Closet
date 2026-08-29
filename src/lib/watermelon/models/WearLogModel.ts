@@ -12,5 +12,4 @@ export class WearLogModel extends Model {
     @relation("articles", "article_id") article: any;
     @relation("outfits", "outfit_id") outfit: any;
     @field("worn_date") wornDate!: string;
-    @field("created_at") createdAt!: string;
 }
