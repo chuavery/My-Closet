@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useOutfitDetail } from "@/viewmodels/useOutfitDetail";
+import { Article } from "@/models/Article";
 import { LayerSlot } from "@/components/LayerSlot";
 import { WornTodayButton } from "@/components/WornTodayButton";
 import { ArticleCard } from "@/components/ArticleCard";
@@ -78,19 +79,14 @@ export default function OutfitDetailScreen() {
             )}
 
             <Text style={styles.sectionTitle}>Articles</Text>
-            <FlatList
+            <FlatList<Article>
                 data={articles}
-                keyExtractor={(item: { id: string }) => item.id}
+                keyExtractor={(item) => item.id}
                 numColumns={2}
                 contentContainerStyle={styles.list}
                 columnWrapperStyle={styles.row}
-                renderItem={({
-                    item,
-                }: {
-                    item: { id: string; [key: string]: any };
-                }) => (
+                renderItem={({ item }) => (
                     <ArticleCard
-                        // FIX: TypeScript error: Type '{ id: string; [key: string]: any; }' is not assignable to type 'Article'.
                         article={item}
                         onPress={() => router.push(`/article/${item.id}`)}
                     />

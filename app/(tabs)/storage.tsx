@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useStorageSpaces } from "@/viewmodels/useStorageSpaces";
+import { StorageSpace } from "@/models/StorageSpace";
 import { StorageSpaceRow } from "@/components/StorageSpaceRow";
 import { colors } from "@/theme/colors";
 import { typography } from "@/theme/typography";
@@ -43,13 +44,12 @@ export default function StorageScreen() {
                     </Text>
                 </View>
             )}
-            <FlatList
+            <FlatList<StorageSpace>
                 data={spaces}
-                keyExtractor={(item: { id: any }) => item.id}
+                keyExtractor={(item) => item.id}
                 contentContainerStyle={styles.list}
-                renderItem={({ item }: { item: { id: string } }) => (
+                renderItem={({ item }) => (
                     <StorageSpaceRow
-                        // FIX: TypeScript error: Type '{ id: string; [key: string]: any; }' is not assignable to type 'StorageSpace'.
                         space={item}
                         articleCount={(articlesBySpace[item.id] ?? []).length}
                         onPress={() => router.push(`/storage/${item.id}`)}

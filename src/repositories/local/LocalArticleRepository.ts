@@ -75,10 +75,10 @@ export class LocalArticleRepository implements ArticleRepository {
       if (updates.size !== undefined) rec.size = updates.size;
       if (updates.originalImageUrl !== undefined) rec.originalImageUrl = updates.originalImageUrl;
       if (updates.processedImageUrl !== undefined) rec.processedImageUrl = updates.processedImageUrl;
-      if (updates.storageSpaceId !== undefined) rec.storageSpaceId = updates.storageSpaceId;
+      if (updates.storageSpaceId !== undefined) rec.storageSpace.id = updates.storageSpaceId;
       if (updates.source !== undefined) rec.source = updates.source;
       if (updates.wearCount !== undefined) rec.wearCount = updates.wearCount;
-      if (updates.lastWornAt !== undefined) rec.lastWornAt = updates.lastWornAt;
+      if (updates.lastWornAt !== undefined) rec.lastWornAt = updates.lastWornAt ?? undefined;
     });
   }
 
@@ -107,7 +107,7 @@ export class LocalArticleRepository implements ArticleRepository {
   ): Promise<void> {
     const model = await this.collection.find(articleId);
     await model.update((rec) => {
-      rec.storageSpaceId = storageSpaceId;
+      rec.storageSpace.id = storageSpaceId;
     });
   }
 

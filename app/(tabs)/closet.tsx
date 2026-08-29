@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useClosetHome } from "@/viewmodels/useClosetHome";
+import { Article } from "@/models/Article";
 import { ArticleCard } from "@/components/ArticleCard";
 import { FilterChipRow } from "@/components/FilterChipRow";
 import { colors } from "@/theme/colors";
@@ -74,19 +75,14 @@ export default function ClosetScreen() {
                 selectedValue={filters.color}
                 onSelect={(v: string | null) => setFilter("color", v)}
             />
-            <FlatList
+            <FlatList<Article>
                 data={articles}
-                keyExtractor={(item: { id: any }) => item.id}
+                keyExtractor={(item) => item.id}
                 numColumns={2}
                 contentContainerStyle={styles.list}
                 columnWrapperStyle={styles.row}
-                renderItem={({
-                    item,
-                }: {
-                    item: { id: string; [key: string]: any };
-                }) => (
+                renderItem={({ item }) => (
                     <ArticleCard
-                        // FIX: TypeScript error: Type '{ id: string; [key: string]: any; }' is not assignable to type 'Article'.
                         article={item}
                         onPress={() => router.push(`/article/${item.id}`)}
                     />

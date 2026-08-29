@@ -64,7 +64,7 @@ export class LocalOutfitRepository implements OutfitRepository {
     await model.update((rec) => {
       if (updates.name !== undefined) rec.name = updates.name;
       if (updates.wearCount !== undefined) rec.wearCount = updates.wearCount;
-      if (updates.lastWornAt !== undefined) rec.lastWornAt = updates.lastWornAt;
+      if (updates.lastWornAt !== undefined) rec.lastWornAt = updates.lastWornAt ?? undefined;
     });
   }
 
