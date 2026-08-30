@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Article, ArticleType, Color } from '@/models/Article';
+import { Article, ArticleType, Color, Fit } from '@/models/Article';
 import { Tag } from '@/models/Tag';
 import { useRepositories } from '@/providers/RepositoryProvider';
 
 export interface ClosetFilters {
   articleType: ArticleType | null;
   color: Color | null;
+  fit: Fit | null;
   tagId: string | null;
 }
 
@@ -17,6 +18,7 @@ export function useClosetHome() {
   const [filters, setFilters] = useState<ClosetFilters>({
     articleType: null,
     color: null,
+    fit: null,
     tagId: null,
   });
   const [loading, setLoading] = useState(true);
@@ -54,6 +56,10 @@ export function useClosetHome() {
 
     if (filters.color) {
       result = result.filter((a) => a.color === filters.color);
+    }
+
+    if (filters.fit) {
+      result = result.filter((a) => a.fit === filters.fit);
     }
 
     return result;

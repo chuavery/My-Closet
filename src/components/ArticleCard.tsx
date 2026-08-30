@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
 import { Article } from '@/models/Article';
-import { colors } from '@/theme/colors';
+import { useTheme } from '@/providers/ThemeContext';
+import { colors as lightColors } from '@/theme/colors';
 import { typography } from '@/theme/typography';
 import { spacing, borderRadius } from '@/theme/spacing';
 
@@ -25,8 +26,20 @@ const COLOR_MAP: Record<string, string> = {
 };
 
 export function ArticleCard({ article, onPress }: ArticleCardProps) {
+  const { colors, isDark } = useTheme();
+  const isWhiteColor = article.color === 'white';
+  const colorTagBg = isWhiteColor && !isDark
+    ? 'transparent'
+    : (COLOR_MAP[article.color] ?? colors.accent) + "20";
+  const colorTagBorder = isWhiteColor && !isDark
+    ? { borderWidth: 1, borderColor: colors.border }
+    : {};
+  const colorTagTextColor = isWhiteColor && !isDark
+    ? colors.ink
+    : COLOR_MAP[article.color] ?? colors.accent;
+
   return (
-    <Pressable style={styles.card} onPress={onPress}>
+    <Pressable style={[styles.card, { backgroundColor: colors.white, borderColor: colors.border }]} onPress={onPress}>
       <View style={styles.imageContainer}>
         {article.originalImageUrl ? (
           <Image
@@ -47,14 +60,25 @@ export function ArticleCard({ article, onPress }: ArticleCardProps) {
         )}
       </View>
       <View style={styles.info}>
-        <Text style={styles.name} numberOfLines={1}>
+        <Text style={[styles.name, { color: colors.ink }]} numberOfLines={1}>
           {article.name ?? article.articleType}
         </Text>
         {article.brand && (
-          <Text style={styles.brand} numberOfLines={1}>
+          <Text style={[styles.brand, { color: colors.inkLight }]} numberOfLines={1}>
             {article.brand}
           </Text>
         )}
+        <View style={styles.tags}>
+          <View style={[styles.tag, { backgroundColor: colors.accent + "20" }]}>
+            <Text style={[styles.tagLabel, { color: colors.accent }]}>{article.articleType}</Text>
+          </View>
+          <View style={[styles.tag, { backgroundColor: colorTagBg, ...colorTagBorder }]}>
+            <Text style={[styles.tagLabel, { color: colorTagTextColor }]}>{article.color}</Text>
+          </View>
+          <View style={[styles.tag, { backgroundColor: colors.accent + "20" }]}>
+            <Text style={[styles.tagLabel, { color: colors.accent }]}>{article.fit}</Text>
+          </View>
+        </View>
       </View>
     </Pressable>
   );
@@ -63,10 +87,8 @@ export function ArticleCard({ article, onPress }: ArticleCardProps) {
 const styles = StyleSheet.create({
   card: {
     width: '48%',
-    backgroundColor: colors.white,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.border,
     overflow: 'hidden',
     marginBottom: spacing.md,
   },
@@ -86,7 +108,7 @@ const styles = StyleSheet.create({
   },
   placeholderText: {
     ...typography.h1,
-    color: colors.white,
+    color: lightColors.white,
     opacity: 0.8,
   },
   info: {
@@ -94,12 +116,25 @@ const styles = StyleSheet.create({
   },
   name: {
     ...typography.bodySmall,
-    color: colors.ink,
     fontWeight: '600',
   },
   brand: {
     ...typography.caption,
-    color: colors.inkLight,
     marginTop: 2,
+  },
+  tags: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+    marginTop: spacing.xs,
+  },
+  tag: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    borderRadius: borderRadius.round,
+  },
+  tagLabel: {
+    ...typography.caption,
+    fontSize: 10,
   },
 });

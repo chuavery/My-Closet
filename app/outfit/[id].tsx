@@ -23,6 +23,7 @@ export default function OutfitDetailScreen() {
         outfit,
         articles,
         tags,
+        wearHistoryEnabled,
         loading,
     } = useOutfitDetail(id ?? "");
 
@@ -56,12 +57,14 @@ export default function OutfitDetailScreen() {
         <View style={styles.container}>
             <View style={styles.header}>
                 <Text style={styles.name}>{outfit.name}</Text>
-                <Text style={styles.meta}>
-                    {outfit.wearCount} worn
-                    {outfit.lastWornAt
-                        ? ` · Last: ${new Date(outfit.lastWornAt).toLocaleDateString()}`
-                        : ""}
-                </Text>
+                {wearHistoryEnabled && (
+                    <Text style={styles.meta}>
+                        {outfit.wearCount} worn
+                        {outfit.lastWornAt
+                            ? ` · Last: ${new Date(outfit.lastWornAt).toLocaleDateString()}`
+                            : ""}
+                    </Text>
+                )}
             </View>
 
             {tags.length > 0 && (

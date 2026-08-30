@@ -11,9 +11,7 @@ import {
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useOutfitBuilder } from "@/viewmodels/useOutfitBuilder";
 import { LayerType } from "@/models/OutfitArticle";
-import { ArticleType, Color } from "@/models/Article";
 import { LayerSlot } from "@/components/LayerSlot";
-import { OccasionTagPicker } from "@/components/OccasionTagPicker";
 import { ArticleListItem } from "@/components/ArticleListItem";
 import { FilterChipRow } from "@/components/FilterChipRow";
 import { colors } from "@/theme/colors";
@@ -44,6 +42,16 @@ const COLOR_OPTIONS: { label: string; value: string }[] = [
     { label: "Green", value: "green" },
 ];
 
+const FIT_OPTIONS: { label: string; value: string }[] = [
+    { label: "All", value: "" },
+    { label: "Slim", value: "slim" },
+    { label: "Regular", value: "regular" },
+    { label: "Straight", value: "straight" },
+    { label: "Oversized", value: "oversized" },
+    { label: "Relaxed", value: "relaxed" },
+    { label: "Tailored", value: "tailored" },
+];
+
 export default function OutfitBuilderScreen() {
     const router = useRouter();
     const { id } = useLocalSearchParams<{ id: string }>();
@@ -57,6 +65,7 @@ export default function OutfitBuilderScreen() {
         setSelectedTagIds,
         addArticle,
         removeArticle,
+        createTag,
         save,
         deleteOutfit,
         saving,
@@ -67,9 +76,13 @@ export default function OutfitBuilderScreen() {
     const [pickerSearch, setPickerSearch] = useState("");
     const [pickerTypeFilter, setPickerTypeFilter] = useState<string | null>(null);
     const [pickerColorFilter, setPickerColorFilter] = useState<string | null>(null);
+    const [pickerFitFilter, setPickerFitFilter] = useState<string | null>(null);
     const [filtersExpanded, setFiltersExpanded] = useState(false);
 
-    const hasActiveFilters = pickerTypeFilter !== null || pickerColorFilter !== null;
+    const [tagSearch, setTagSearch] = useState("");
+    const [showTagPicker, setShowTagPicker] = useState(false);
+
+    const hasActiveFilters = pickerTypeFilter !== null || pickerColorFilter !== null || pickerFitFilter !== null;
 
     const filteredArticles = useMemo(() => {
         return allArticles.filter((a) => {
@@ -79,13 +92,35 @@ export default function OutfitBuilderScreen() {
                 a.brand?.toLowerCase().includes(pickerSearch.toLowerCase());
             const matchesType = !pickerTypeFilter || a.articleType === pickerTypeFilter;
             const matchesColor = !pickerColorFilter || a.color === pickerColorFilter;
-            return matchesSearch && matchesType && matchesColor;
+            const matchesFit = !pickerFitFilter || a.fit === pickerFitFilter;
+            return matchesSearch && matchesType && matchesColor && matchesFit;
         });
-    }, [allArticles, pickerSearch, pickerTypeFilter, pickerColorFilter]);
+    }, [allArticles, pickerSearch, pickerTypeFilter, pickerColorFilter, pickerFitFilter]);
+
+    const filteredTags = useMemo(() => {
+        if (!tagSearch.trim()) return allTags;
+        const q = tagSearch.toLowerCase();
+        return allTags.filter((t) => t.name.toLowerCase().includes(q));
+    }, [allTags, tagSearch]);
+
+    const exactTagMatch = useMemo(() => {
+        const q = tagSearch.trim().toLowerCase();
+        if (!q) return null;
+        return allTags.find((t) => t.name.toLowerCase() === q) ?? null;
+    }, [allTags, tagSearch]);
 
     const getArticleName = (articleId: string) => {
         const article = allArticles.find((a) => a.id === articleId);
         return article?.name ?? article?.articleType ?? null;
+    };
+
+    const handleCreateTag = async () => {
+        const tag = await createTag(tagSearch);
+        if (tag && !selectedTagIds.includes(tag.id)) {
+            setSelectedTagIds((prev) => [...prev, tag.id]);
+        }
+        setTagSearch("");
+        setShowTagPicker(false);
     };
 
     return (
@@ -104,6 +139,77 @@ export default function OutfitBuilderScreen() {
                 placeholderTextColor={colors.inkLight}
             />
 
+            <Text style={styles.sectionTitle}>Occasion Tags</Text>
+            <View style={styles.tagSection}>
+                <View style={styles.tagSearchRow}>
+                    <TextInput
+                        style={styles.tagSearchInput}
+                        placeholder="Search or add tags..."
+                        placeholderTextColor={colors.inkLight}
+                        value={tagSearch}
+                        onChangeText={setTagSearch}
+                        onFocus={() => setShowTagPicker(true)}
+                    />
+                    {tagSearch.trim() && !exactTagMatch && (
+                        <Pressable style={styles.addTagButton} onPress={handleCreateTag}>
+                            <Text style={styles.addTagLabel}>+ Add</Text>
+                        </Pressable>
+                    )}
+                </View>
+                {showTagPicker && (
+                    <View style={styles.tagDropdown}>
+                        <ScrollView style={styles.tagDropdownScroll} nestedScrollEnabled>
+                            {filteredTags.length > 0 ? (
+                                filteredTags.map((tag) => {
+                                    const isSelected = selectedTagIds.includes(tag.id);
+                                    return (
+                                        <Pressable
+                                            key={tag.id}
+                                            style={[styles.tagItem, isSelected && styles.tagItemSelected]}
+                                            onPress={() => {
+                                                setSelectedTagIds((prev) =>
+                                                    isSelected
+                                                        ? prev.filter((id) => id !== tag.id)
+                                                        : [...prev, tag.id]
+                                                );
+                                            }}
+                                        >
+                                            <Text style={[styles.tagItemText, isSelected && styles.tagItemTextSelected]}>
+                                                {tag.name}
+                                            </Text>
+                                            {isSelected && <Text style={styles.tagCheck}>✓</Text>}
+                                        </Pressable>
+                                    );
+                                })
+                            ) : (
+                                <Text style={styles.tagEmpty}>No tags found</Text>
+                            )}
+                        </ScrollView>
+                        <Pressable style={styles.tagDoneButton} onPress={() => setShowTagPicker(false)}>
+                            <Text style={styles.tagDoneLabel}>Done</Text>
+                        </Pressable>
+                    </View>
+                )}
+                {selectedTagIds.length > 0 && (
+                    <View style={styles.selectedTags}>
+                        {selectedTagIds.map((tagId) => {
+                            const tag = allTags.find((t) => t.id === tagId);
+                            if (!tag) return null;
+                            return (
+                                <View key={tagId} style={styles.selectedTag}>
+                                    <Text style={styles.selectedTagText}>{tag.name}</Text>
+                                    <Pressable
+                                        onPress={() => setSelectedTagIds((prev) => prev.filter((id) => id !== tagId))}
+                                    >
+                                        <Text style={styles.selectedTagRemove}>×</Text>
+                                    </Pressable>
+                                </View>
+                            );
+                        })}
+                    </View>
+                )}
+            </View>
+
             <Text style={styles.sectionTitle}>Layers</Text>
             {LAYER_TYPES.map((lt) => {
                 const oa = outfitArticles.find((o) => o.layerType === lt);
@@ -117,6 +223,7 @@ export default function OutfitBuilderScreen() {
                             setPickerSearch("");
                             setPickerTypeFilter(null);
                             setPickerColorFilter(null);
+                            setPickerFitFilter(null);
                             setFiltersExpanded(false);
                             setShowArticlePicker(true);
                         }}
@@ -177,6 +284,11 @@ export default function OutfitBuilderScreen() {
                                     selectedValue={pickerColorFilter}
                                     onSelect={(v: string | null) => setPickerColorFilter(v)}
                                 />
+                                <FilterChipRow
+                                    options={FIT_OPTIONS}
+                                    selectedValue={pickerFitFilter}
+                                    onSelect={(v: string | null) => setPickerFitFilter(v)}
+                                />
                             </View>
                         )}
 
@@ -206,19 +318,6 @@ export default function OutfitBuilderScreen() {
                     </View>
                 </View>
             )}
-
-            <Text style={styles.sectionTitle}>Occasion Tags</Text>
-            <OccasionTagPicker
-                tags={allTags}
-                selectedTagIds={selectedTagIds}
-                onToggle={(tagId: string) => {
-                    setSelectedTagIds((prev) =>
-                        prev.includes(tagId)
-                            ? prev.filter((id) => id !== tagId)
-                            : [...prev, tagId]
-                    );
-                }}
-            />
 
             <Pressable
                 style={[styles.saveButton, saving && styles.disabled]}
@@ -274,7 +373,7 @@ const styles = StyleSheet.create({
     },
     input: {
         ...typography.body,
-        padding: spacing.md,
+        padding: spacing.sm,
         backgroundColor: colors.white,
         borderRadius: 8,
         borderWidth: 1,
@@ -286,6 +385,107 @@ const styles = StyleSheet.create({
         color: colors.ink,
         marginTop: spacing.xxl,
         marginBottom: spacing.md,
+    },
+    tagSection: {
+        marginBottom: spacing.sm,
+    },
+    tagSearchRow: {
+        flexDirection: "row",
+        gap: spacing.sm,
+        alignItems: "center",
+    },
+    tagSearchInput: {
+        ...typography.body,
+        flex: 1,
+        padding: spacing.sm,
+        backgroundColor: colors.white,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: colors.border,
+        color: colors.ink,
+    },
+    addTagButton: {
+        paddingVertical: spacing.sm,
+        paddingHorizontal: spacing.md,
+        backgroundColor: colors.accent,
+        borderRadius: 8,
+    },
+    addTagLabel: {
+        ...typography.buttonSmall,
+        color: colors.white,
+    },
+    tagDropdown: {
+        marginTop: spacing.sm,
+        backgroundColor: colors.white,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: colors.border,
+        maxHeight: 200,
+    },
+    tagDropdownScroll: {
+        maxHeight: 160,
+    },
+    tagItem: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: spacing.sm,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.border,
+    },
+    tagItemSelected: {
+        backgroundColor: colors.accent + "10",
+    },
+    tagItemText: {
+        ...typography.body,
+        color: colors.ink,
+    },
+    tagItemTextSelected: {
+        color: colors.accent,
+        fontWeight: "600",
+    },
+    tagCheck: {
+        ...typography.body,
+        color: colors.accent,
+    },
+    tagEmpty: {
+        ...typography.body,
+        color: colors.inkLight,
+        textAlign: "center",
+        padding: spacing.lg,
+    },
+    tagDoneButton: {
+        padding: spacing.sm,
+        alignItems: "center",
+        borderTopWidth: 1,
+        borderTopColor: colors.border,
+    },
+    tagDoneLabel: {
+        ...typography.buttonSmall,
+        color: colors.accent,
+    },
+    selectedTags: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: spacing.xs,
+        marginTop: spacing.sm,
+    },
+    selectedTag: {
+        flexDirection: "row",
+        alignItems: "center",
+        paddingHorizontal: spacing.sm,
+        paddingVertical: spacing.xs,
+        borderRadius: borderRadius.round,
+        backgroundColor: colors.accent + "20",
+    },
+    selectedTagText: {
+        ...typography.caption,
+        color: colors.accent,
+    },
+    selectedTagRemove: {
+        ...typography.caption,
+        color: colors.accent,
+        marginLeft: spacing.xs,
     },
     pickerOverlay: {
         position: "absolute",
@@ -385,7 +585,7 @@ const styles = StyleSheet.create({
     saveButton: {
         marginTop: spacing.xxl,
         backgroundColor: colors.accent,
-        paddingVertical: spacing.md,
+        paddingVertical: spacing.sm,
         borderRadius: 8,
         alignItems: "center",
     },
@@ -398,7 +598,7 @@ const styles = StyleSheet.create({
     },
     deleteButton: {
         marginTop: spacing.md,
-        paddingVertical: spacing.md,
+        paddingVertical: spacing.sm,
         alignItems: "center",
         borderWidth: 1,
         borderColor: colors.error,

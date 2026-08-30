@@ -1,7 +1,7 @@
 import { appSchema, tableSchema } from '@nozbe/watermelondb';
 
 export const schema = appSchema({
-  version: 2,
+  version: 3,
   tables: [
     tableSchema({
       name: 'articles',
@@ -79,6 +79,7 @@ export const schema = appSchema({
       name: 'user_settings',
       columns: [
         { name: 'wear_history_enabled', type: 'boolean' },
+        { name: 'theme_mode', type: 'string' },
       ],
     }),
   ],

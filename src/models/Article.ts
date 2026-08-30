@@ -24,6 +24,14 @@ export type Color =
   | 'brown'
   | 'black';
 
+export type Fit =
+  | 'slim'
+  | 'regular'
+  | 'straight'
+  | 'oversized'
+  | 'relaxed'
+  | 'tailored';
+
 export type Source = 'manual' | 'ai_on_device' | 'ai_online';
 
 export interface Article {
@@ -33,7 +41,7 @@ export interface Article {
   articleType: ArticleType;
   color: Color;
   fabricType?: string;
-  fit?: string;
+  fit?: Fit;
   size?: string;
   originalImageUrl: string;
   processedImageUrl?: string;

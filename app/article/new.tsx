@@ -11,37 +11,23 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useArticleForm } from "@/viewmodels/useArticleForm";
-import { ArticleType, Color } from "@/models/Article";
+import { ArticleType, Color, Fit } from "@/models/Article";
 import { colors } from "@/theme/colors";
 import { typography } from "@/theme/typography";
 import { spacing, borderRadius } from "@/theme/spacing";
 
 const ARTICLE_TYPES: ArticleType[] = [
-    "shirt",
-    "jacket",
-    "dress",
-    "pants",
-    "shorts",
-    "skirt",
-    "sweater",
-    "coat",
-    "shoes",
-    "accessories",
-    "other",
+    "shirt", "jacket", "dress", "pants", "shorts",
+    "skirt", "sweater", "coat", "shoes", "accessories", "other",
 ];
 
 const COLOR_OPTIONS: Color[] = [
-    "red",
-    "orange",
-    "yellow",
-    "green",
-    "blue",
-    "indigo",
-    "violet",
-    "pink",
-    "white",
-    "brown",
-    "black",
+    "red", "orange", "yellow", "green", "blue",
+    "indigo", "violet", "pink", "white", "brown", "black",
+];
+
+const FIT_OPTIONS: Fit[] = [
+    "slim", "regular", "straight", "oversized", "relaxed", "tailored",
 ];
 
 export default function NewArticleScreen() {
@@ -101,19 +87,10 @@ export default function NewArticleScreen() {
                 {ARTICLE_TYPES.map((t) => (
                     <Pressable
                         key={t}
-                        style={[
-                            styles.chip,
-                            form.articleType === t && styles.chipSelected,
-                        ]}
+                        style={[styles.chip, form.articleType === t && styles.chipSelected]}
                         onPress={() => updateField("articleType", t)}
                     >
-                        <Text
-                            style={[
-                                styles.chipLabel,
-                                form.articleType === t &&
-                                    styles.chipLabelSelected,
-                            ]}
-                        >
+                        <Text style={[styles.chipLabel, form.articleType === t && styles.chipLabelSelected]}>
                             {t}
                         </Text>
                     </Pressable>
@@ -125,50 +102,52 @@ export default function NewArticleScreen() {
                 {COLOR_OPTIONS.map((c) => (
                     <Pressable
                         key={c}
-                        style={[
-                            styles.chip,
-                            form.color === c && styles.chipSelected,
-                        ]}
+                        style={[styles.chip, form.color === c && styles.chipSelected]}
                         onPress={() => updateField("color", c)}
                     >
-                        <Text
-                            style={[
-                                styles.chipLabel,
-                                form.color === c && styles.chipLabelSelected,
-                            ]}
-                        >
+                        <Text style={[styles.chipLabel, form.color === c && styles.chipLabelSelected]}>
                             {c}
                         </Text>
                     </Pressable>
                 ))}
             </View>
 
-            <Text style={styles.label}>Size</Text>
-            <TextInput
-                style={styles.input}
-                value={form.size}
-                onChangeText={(v: string) => updateField("size", v)}
-                placeholder="Size"
-                placeholderTextColor={colors.inkLight}
-            />
-
             <Text style={styles.label}>Fit</Text>
-            <TextInput
-                style={styles.input}
-                value={form.fit}
-                onChangeText={(v: string) => updateField("fit", v)}
-                placeholder="Fit (e.g. slim, regular)"
-                placeholderTextColor={colors.inkLight}
-            />
+            <View style={styles.chipRow}>
+                {FIT_OPTIONS.map((f) => (
+                    <Pressable
+                        key={f}
+                        style={[styles.chip, form.fit === f && styles.chipSelected]}
+                        onPress={() => updateField("fit", f)}
+                    >
+                        <Text style={[styles.chipLabel, form.fit === f && styles.chipLabelSelected]}>
+                            {f}
+                        </Text>
+                    </Pressable>
+                ))}
+            </View>
 
-            <Text style={styles.label}>Fabric</Text>
-            <TextInput
-                style={styles.input}
-                value={form.fabricType}
-                onChangeText={(v: string) => updateField("fabricType", v)}
-                placeholder="Fabric type"
-                placeholderTextColor={colors.inkLight}
-            />
+            <Text style={styles.label}>Details</Text>
+            <View style={styles.detailsRow}>
+                <View style={styles.detailField}>
+                    <TextInput
+                        style={styles.input}
+                        value={form.size}
+                        onChangeText={(v: string) => updateField("size", v)}
+                        placeholder="Size"
+                        placeholderTextColor={colors.inkLight}
+                    />
+                </View>
+                <View style={styles.detailField}>
+                    <TextInput
+                        style={styles.input}
+                        value={form.fabricType}
+                        onChangeText={(v: string) => updateField("fabricType", v)}
+                        placeholder="Fabric"
+                        placeholderTextColor={colors.inkLight}
+                    />
+                </View>
+            </View>
 
             <Pressable
                 style={[styles.saveButton, saving && styles.disabled]}
@@ -252,7 +231,7 @@ const styles = StyleSheet.create({
     },
     input: {
         ...typography.body,
-        padding: spacing.md,
+        padding: spacing.sm,
         backgroundColor: colors.white,
         borderRadius: 8,
         borderWidth: 1,
@@ -284,10 +263,17 @@ const styles = StyleSheet.create({
     chipLabelSelected: {
         color: colors.white,
     },
+    detailsRow: {
+        flexDirection: "row",
+        gap: spacing.sm,
+    },
+    detailField: {
+        flex: 1,
+    },
     saveButton: {
         marginTop: spacing.xxl,
         backgroundColor: colors.accent,
-        paddingVertical: spacing.md,
+        paddingVertical: spacing.sm,
         borderRadius: 8,
         alignItems: "center",
     },

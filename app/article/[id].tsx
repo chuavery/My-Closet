@@ -13,9 +13,11 @@ import {
 import { useRouter, useLocalSearchParams, useNavigation } from "expo-router";
 import { useArticleForm } from "@/viewmodels/useArticleForm";
 import { useRepositories } from "@/providers/RepositoryProvider";
-import { ArticleType, Color } from "@/models/Article";
+import { useSettings } from "@/viewmodels/useSettings";
+import { useTheme } from "@/providers/ThemeContext";
+import { ArticleType, Color, Fit } from "@/models/Article";
 import { StorageSpace } from "@/models/StorageSpace";
-import { colors } from "@/theme/colors";
+import { colors as lightColors } from "@/theme/colors";
 import { typography } from "@/theme/typography";
 import { spacing, borderRadius } from "@/theme/spacing";
 
@@ -29,14 +31,34 @@ const COLOR_OPTIONS: Color[] = [
     "indigo", "violet", "pink", "white", "brown", "black",
 ];
 
+const FIT_OPTIONS: Fit[] = [
+    "slim", "regular", "straight", "oversized", "relaxed", "tailored",
+];
+
+const COLOR_MAP: Record<string, string> = {
+    red: '#C45B3E',
+    orange: '#E88A4A',
+    yellow: '#E8C84A',
+    green: '#5A8F6A',
+    blue: '#4A7AE8',
+    indigo: '#5A4AE8',
+    violet: '#8A4AE8',
+    pink: '#E87AB0',
+    white: '#F0EDE6',
+    brown: '#8B6F47',
+    black: '#2C2C2C',
+};
+
 export default function ArticleDetailScreen() {
     const router = useRouter();
     const navigation = useNavigation();
     const { id } = useLocalSearchParams<{ id: string }>();
-    const { form, updateField, pickImage, takePhoto, save, remove, loading, saving, isNew } =
+    const { form, updateField, pickImage, takePhoto, save, remove, loading, saving, isNew, wearCount, lastWornAt } =
         useArticleForm(id);
 
     const { storageSpaceRepository } = useRepositories();
+    const { settings } = useSettings();
+    const { colors, isDark } = useTheme();
     const [spaces, setSpaces] = useState<StorageSpace[]>([]);
     const [editing, setEditing] = useState(isNew);
     const [showSpacePicker, setShowSpacePicker] = useState(false);
@@ -60,6 +82,10 @@ export default function ArticleDetailScreen() {
         });
     }, [navigation, editing, isNew]);
 
+    useEffect(() => {
+        navigation.setOptions({ title: form.name || "Article" });
+    }, [navigation, form.name]);
+
     const selectedSpace = spaces.find((s) => s.id === form.storageSpaceId);
 
     if (loading) {
@@ -72,10 +98,10 @@ export default function ArticleDetailScreen() {
 
     return (
         <ScrollView
-            style={styles.container}
+            style={[styles.container, { backgroundColor: colors.paper }]}
             contentContainerStyle={styles.content}
         >
-            <Text style={styles.label}>Photo</Text>
+            <Text style={[styles.label, { color: colors.inkLight }]}>Photo</Text>
             {form.originalImageUrl ? (
                 <View style={styles.imagePreview}>
                     <Image
@@ -103,126 +129,72 @@ export default function ArticleDetailScreen() {
                 <Text style={styles.emptyValue}>No photo</Text>
             )}
 
-            <Text style={styles.label}>Name</Text>
-            {editing ? (
-                <TextInput
-                    style={styles.input}
-                    value={form.name}
-                    onChangeText={(v: string) => updateField("name", v)}
-                    placeholder="Article name"
-                    placeholderTextColor={colors.inkLight}
-                />
-            ) : (
-                <Text style={styles.value}>{form.name || "—"}</Text>
-            )}
-
-            <Text style={styles.label}>Brand</Text>
-            {editing ? (
-                <TextInput
-                    style={styles.input}
-                    value={form.brand}
-                    onChangeText={(v: string) => updateField("brand", v)}
-                    placeholder="Brand"
-                    placeholderTextColor={colors.inkLight}
-                />
-            ) : (
-                <Text style={styles.value}>{form.brand || "—"}</Text>
-            )}
-
-            <Text style={styles.label}>Type</Text>
-            {editing ? (
-                <View style={styles.chipRow}>
-                    {ARTICLE_TYPES.map((t) => (
-                        <Pressable
-                            key={t}
-                            style={[styles.chip, form.articleType === t && styles.chipSelected]}
-                            onPress={() => updateField("articleType", t)}
-                        >
-                            <Text
-                                style={[styles.chipLabel, form.articleType === t && styles.chipLabelSelected]}
-                            >
-                                {t}
-                            </Text>
-                        </Pressable>
-                    ))}
+            <View style={styles.tags}>
+                <View style={[styles.tag, { backgroundColor: colors.accent + "20" }]}>
+                    <Text style={[styles.tagLabel, { color: colors.accent }]}>{form.articleType}</Text>
                 </View>
-            ) : (
-                <Text style={styles.value}>{form.articleType}</Text>
-            )}
-
-            <Text style={styles.label}>Color</Text>
-            {editing ? (
-                <View style={styles.chipRow}>
-                    {COLOR_OPTIONS.map((c) => (
-                        <Pressable
-                            key={c}
-                            style={[styles.chip, form.color === c && styles.chipSelected]}
-                            onPress={() => updateField("color", c)}
-                        >
-                            <Text
-                                style={[styles.chipLabel, form.color === c && styles.chipLabelSelected]}
-                            >
-                                {c}
-                            </Text>
-                        </Pressable>
-                    ))}
+                <View style={[
+                    styles.tag,
+                    {
+                        backgroundColor: form.color === 'white' && !isDark
+                            ? 'transparent'
+                            : (COLOR_MAP[form.color] ?? colors.accent) + "20",
+                        ...(form.color === 'white' && !isDark ? { borderWidth: 1, borderColor: colors.border } : {}),
+                    },
+                ]}>
+                    <Text style={[
+                        styles.tagLabel,
+                        {
+                            color: form.color === 'white' && !isDark
+                                ? colors.ink
+                                : COLOR_MAP[form.color] ?? colors.accent,
+                        },
+                    ]}>{form.color}</Text>
                 </View>
-            ) : (
-                <Text style={styles.value}>{form.color}</Text>
+                <View style={[styles.tag, { backgroundColor: colors.accent + "20" }]}>
+                    <Text style={[styles.tagLabel, { color: colors.accent }]}>{form.fit}</Text>
+                </View>
+            </View>
+
+            <Text style={[styles.label, { color: colors.inkLight }]}>Name</Text>
+            <Text style={[styles.value, { color: colors.ink }]}>{form.name || "—"}</Text>
+
+            <Text style={[styles.label, { color: colors.inkLight }]}>Brand</Text>
+            <Text style={[styles.value, { color: colors.ink }]}>{form.brand || "—"}</Text>
+
+            <Text style={[styles.label, { color: colors.inkLight }]}>Size</Text>
+            <Text style={[styles.value, { color: colors.ink }]}>{form.size || "—"}</Text>
+
+            <Text style={[styles.label, { color: colors.inkLight }]}>Fabric</Text>
+            <Text style={[styles.value, { color: colors.ink }]}>{form.fabricType || "—"}</Text>
+
+            {settings.wearHistoryEnabled && (
+                <>
+                    <Text style={[styles.label, { color: colors.inkLight }]}>Wear Count</Text>
+                    <Text style={[styles.value, { color: colors.ink }]}>{wearCount}</Text>
+
+                    <Text style={[styles.label, { color: colors.inkLight }]}>Last Worn</Text>
+                    <Text style={[styles.value, { color: colors.ink }]}>
+                        {lastWornAt
+                            ? new Date(lastWornAt).toLocaleDateString()
+                            : "—"}
+                    </Text>
+                </>
             )}
 
-            <Text style={styles.label}>Size</Text>
-            {editing ? (
-                <TextInput
-                    style={styles.input}
-                    value={form.size}
-                    onChangeText={(v: string) => updateField("size", v)}
-                    placeholder="Size"
-                    placeholderTextColor={colors.inkLight}
-                />
-            ) : (
-                <Text style={styles.value}>{form.size || "—"}</Text>
-            )}
-
-            <Text style={styles.label}>Fit</Text>
-            {editing ? (
-                <TextInput
-                    style={styles.input}
-                    value={form.fit}
-                    onChangeText={(v: string) => updateField("fit", v)}
-                    placeholder="Fit (e.g. slim, regular)"
-                    placeholderTextColor={colors.inkLight}
-                />
-            ) : (
-                <Text style={styles.value}>{form.fit || "—"}</Text>
-            )}
-
-            <Text style={styles.label}>Fabric</Text>
-            {editing ? (
-                <TextInput
-                    style={styles.input}
-                    value={form.fabricType}
-                    onChangeText={(v: string) => updateField("fabricType", v)}
-                    placeholder="Fabric type"
-                    placeholderTextColor={colors.inkLight}
-                />
-            ) : (
-                <Text style={styles.value}>{form.fabricType || "—"}</Text>
-            )}
-
-            <Text style={styles.label}>Storage Space</Text>
+            <Text style={[styles.label, { color: colors.inkLight }]}>Storage Space</Text>
             {editing ? (
                 <Pressable
-                    style={styles.dropdown}
+                    style={[styles.dropdown, { backgroundColor: colors.white, borderColor: colors.border }]}
                     onPress={() => setShowSpacePicker(true)}
                 >
-                    <Text style={[styles.dropdownText, !selectedSpace && styles.dropdownPlaceholder]}>
+                    <Text style={[styles.dropdownText, { color: colors.ink }, !selectedSpace && { color: colors.inkLight }]}>
                         {selectedSpace?.name ?? "Unassigned"}
                     </Text>
-                    <Text style={styles.dropdownArrow}>▼</Text>
+                    <Text style={[styles.dropdownArrow, { color: colors.inkLight }]}>▼</Text>
                 </Pressable>
             ) : (
-                <Text style={styles.value}>{selectedSpace?.name ?? "Unassigned"}</Text>
+                <Text style={[styles.value, { color: colors.ink }]}>{selectedSpace?.name ?? "Unassigned"}</Text>
             )}
 
             {editing && (
@@ -310,13 +282,13 @@ export default function ArticleDetailScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.paper,
+        backgroundColor: lightColors.paper,
     },
     center: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: colors.paper,
+        backgroundColor: lightColors.paper,
     },
     content: {
         padding: spacing.lg,
@@ -324,22 +296,22 @@ const styles = StyleSheet.create({
     },
     headerButton: {
         ...typography.buttonSmall,
-        color: colors.accent,
+        color: lightColors.accent,
     },
     label: {
         ...typography.bodySmall,
-        color: colors.inkLight,
+        color: lightColors.inkLight,
         fontWeight: "600",
         marginBottom: spacing.xs,
         marginTop: spacing.md,
     },
     value: {
         ...typography.body,
-        color: colors.ink,
+        color: lightColors.ink,
     },
     emptyValue: {
         ...typography.body,
-        color: colors.border,
+        color: lightColors.border,
         fontStyle: "italic",
     },
     photoButtons: {
@@ -351,10 +323,10 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         padding: spacing.lg,
-        backgroundColor: colors.white,
+        backgroundColor: lightColors.white,
         borderRadius: borderRadius.md,
         borderWidth: 2,
-        borderColor: colors.border,
+        borderColor: lightColors.border,
         borderStyle: "dashed",
     },
     photoButtonIcon: {
@@ -363,7 +335,7 @@ const styles = StyleSheet.create({
     },
     photoButtonLabel: {
         ...typography.bodySmall,
-        color: colors.ink,
+        color: lightColors.ink,
         textAlign: "center",
     },
     imagePreview: {
@@ -373,7 +345,7 @@ const styles = StyleSheet.create({
         width: "100%",
         aspectRatio: 3 / 4,
         borderRadius: borderRadius.md,
-        backgroundColor: colors.paperDark,
+        backgroundColor: lightColors.paperDark,
     },
     changePhotoButton: {
         marginTop: spacing.sm,
@@ -382,68 +354,50 @@ const styles = StyleSheet.create({
     },
     changePhotoLabel: {
         ...typography.bodySmall,
-        color: colors.accent,
+        color: lightColors.accent,
         fontWeight: "600",
     },
-    input: {
-        ...typography.body,
-        padding: spacing.md,
-        backgroundColor: colors.white,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: colors.border,
-        color: colors.ink,
-    },
-    chipRow: {
+    tags: {
         flexDirection: "row",
         flexWrap: "wrap",
         gap: spacing.xs,
+        marginTop: spacing.xs,
     },
-    chip: {
+    tag: {
         paddingHorizontal: spacing.md,
         paddingVertical: spacing.xs,
         borderRadius: borderRadius.round,
-        borderWidth: 1,
-        borderColor: colors.border,
-        backgroundColor: colors.white,
+        backgroundColor: lightColors.accent + "20",
     },
-    chipSelected: {
-        backgroundColor: colors.accent,
-        borderColor: colors.accent,
-    },
-    chipLabel: {
-        ...typography.buttonSmall,
-        color: colors.ink,
-        textTransform: "capitalize",
-    },
-    chipLabelSelected: {
-        color: colors.white,
+    tagLabel: {
+        ...typography.caption,
+        color: lightColors.accent,
     },
     dropdown: {
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: spacing.md,
-        backgroundColor: colors.white,
+        padding: spacing.sm,
+        backgroundColor: lightColors.white,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: colors.border,
+        borderColor: lightColors.border,
     },
     dropdownText: {
         ...typography.body,
-        color: colors.ink,
+        color: lightColors.ink,
     },
     dropdownPlaceholder: {
-        color: colors.inkLight,
+        color: lightColors.inkLight,
     },
     dropdownArrow: {
         ...typography.caption,
-        color: colors.inkLight,
+        color: lightColors.inkLight,
     },
     saveButton: {
         marginTop: spacing.xxl,
-        backgroundColor: colors.accent,
-        paddingVertical: spacing.md,
+        backgroundColor: lightColors.accent,
+        paddingVertical: spacing.sm,
         borderRadius: 8,
         alignItems: "center",
     },
@@ -452,16 +406,16 @@ const styles = StyleSheet.create({
     },
     saveLabel: {
         ...typography.button,
-        color: colors.white,
+        color: lightColors.white,
     },
     deleteButton: {
         marginTop: spacing.md,
-        paddingVertical: spacing.md,
+        paddingVertical: spacing.sm,
         alignItems: "center",
     },
     deleteLabel: {
         ...typography.button,
-        color: colors.error,
+        color: lightColors.error,
     },
     pickerOverlay: {
         position: "absolute",
@@ -473,7 +427,7 @@ const styles = StyleSheet.create({
         justifyContent: "flex-end",
     },
     pickerContent: {
-        backgroundColor: colors.paper,
+        backgroundColor: lightColors.paper,
         borderTopLeftRadius: borderRadius.lg,
         borderTopRightRadius: borderRadius.lg,
         maxHeight: "70%",
@@ -481,23 +435,23 @@ const styles = StyleSheet.create({
     },
     pickerTitle: {
         ...typography.h3,
-        color: colors.ink,
+        color: lightColors.ink,
         marginBottom: spacing.md,
     },
     pickerItem: {
-        padding: spacing.md,
+        padding: spacing.sm,
         borderRadius: 8,
         marginBottom: spacing.xs,
     },
     pickerItemSelected: {
-        backgroundColor: colors.accent + "20",
+        backgroundColor: lightColors.accent + "20",
     },
     pickerItemText: {
         ...typography.body,
-        color: colors.ink,
+        color: lightColors.ink,
     },
     pickerItemTextSelected: {
-        color: colors.accent,
+        color: lightColors.accent,
         fontWeight: "600",
     },
     cancelButton: {
@@ -507,6 +461,6 @@ const styles = StyleSheet.create({
     },
     cancelLabel: {
         ...typography.button,
-        color: colors.inkLight,
+        color: lightColors.inkLight,
     },
 });

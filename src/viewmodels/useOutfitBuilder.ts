@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Alert } from 'react-native';
 import { Outfit } from '@/models/Outfit';
 import { OutfitArticle, LayerType } from '@/models/OutfitArticle';
 import { Article } from '@/models/Article';
@@ -72,24 +73,59 @@ export function useOutfitBuilder(outfitId?: string) {
     [outfitId, outfitRepository]
   );
 
+  const createTag = useCallback(
+    async (name: string): Promise<Tag | null> => {
+      const trimmed = name.trim();
+      if (!trimmed) return null;
+      const existing = allTags.find(
+        (t) => t.name.toLowerCase() === trimmed.toLowerCase()
+      );
+      if (existing) return existing;
+      const tag = await tagRepository.create({
+        name: trimmed,
+        category: 'custom',
+      });
+      setAllTags((prev) => [...prev, tag]);
+      return tag;
+    },
+    [allTags, tagRepository]
+  );
+
+  const validate = useCallback((): string | null => {
+    const hasBase = outfitArticles.some((oa) => oa.layerType === 'base');
+    const hasBottom = outfitArticles.some((oa) => oa.layerType === 'bottom');
+    if (!hasBase) return 'Please add at least one base layer article.';
+    if (!hasBottom) return 'Please add at least one bottom layer article.';
+    return null;
+  }, [outfitArticles]);
+
   const save = useCallback(async (): Promise<Outfit | null> => {
+    const error = validate();
+    if (error) {
+      Alert.alert('Missing layers', error);
+      return null;
+    }
     setSaving(true);
     try {
+      let name = outfit?.name?.trim() ?? '';
+      if (!name) {
+        const allOutfits = await outfitRepository.getAll();
+        name = `Outfit ${allOutfits.length + 1}`;
+      }
+
       if (outfitId) {
-        await outfitRepository.update(outfitId, { name: outfit?.name ?? '' });
+        await outfitRepository.update(outfitId, { name });
         const updated = await outfitRepository.getById(outfitId);
         return updated;
       } else {
-        const created = await outfitRepository.create({
-          name: outfit?.name ?? 'New Outfit',
-        });
+        const created = await outfitRepository.create({ name });
         setOutfit(created);
         return created;
       }
     } finally {
       setSaving(false);
     }
-  }, [outfitId, outfit, outfitRepository]);
+  }, [outfitId, outfit, outfitArticles, outfitRepository, validate]);
 
   const deleteOutfit = useCallback(async () => {
     if (outfitId) {
@@ -107,6 +143,7 @@ export function useOutfitBuilder(outfitId?: string) {
     setSelectedTagIds,
     addArticle,
     removeArticle,
+    createTag,
     save,
     deleteOutfit,
     loading,

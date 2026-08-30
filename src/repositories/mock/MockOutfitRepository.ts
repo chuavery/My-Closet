@@ -28,7 +28,7 @@ export class MockOutfitRepository implements OutfitRepository {
   ): Promise<Outfit> {
     const newOutfit: Outfit = {
       ...outfit,
-      id: `out-${String(outfits.length + 1).padStart(3, '0')}`,
+      id: `out-${String(Math.max(0, ...outfits.map((o) => parseInt(o.id.split('-')[1] ?? '0', 10))) + 1).padStart(3, '0')}`,
       wearCount: 0,
       lastWornAt: null,
       createdAt: new Date().toISOString(),

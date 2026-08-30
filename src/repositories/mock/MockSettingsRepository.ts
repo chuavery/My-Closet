@@ -3,6 +3,7 @@ import { SettingsRepository } from '@/repositories/interfaces/SettingsRepository
 
 let settings: UserSettings = {
   wearHistoryEnabled: false,
+  themeMode: 'system',
 };
 
 export class MockSettingsRepository implements SettingsRepository {

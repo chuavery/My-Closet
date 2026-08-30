@@ -18,7 +18,7 @@ export class MockArticleRepository implements ArticleRepository {
   ): Promise<Article> {
     const newArticle: Article = {
       ...article,
-      id: `art-${String(articles.length + 1).padStart(3, '0')}`,
+      id: `art-${String(Math.max(0, ...articles.map((a) => parseInt(a.id.split('-')[1] ?? '0', 10))) + 1).padStart(3, '0')}`,
       wearCount: 0,
       lastWornAt: null,
       createdAt: new Date().toISOString(),

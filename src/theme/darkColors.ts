@@ -1,0 +1,15 @@
+export const darkColors = {
+  ink: '#F0EDE6',
+  inkLight: '#A09888',
+  paper: '#1C1C1E',
+  paperDark: '#2C2C2E',
+  accent: '#E8826A',
+  accentLight: '#FF9A80',
+  accentDark: '#C45B3E',
+  border: '#3A3A3C',
+  borderDashed: '#4A4A4C',
+  success: '#6AAF7A',
+  error: '#E85B4E',
+  white: '#FFFFFF',
+  overlay: 'rgba(0, 0, 0, 0.6)',
+} as const;

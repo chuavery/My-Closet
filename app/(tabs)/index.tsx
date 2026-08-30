@@ -37,6 +37,16 @@ const COLORS = [
     { label: "Green", value: "green" },
 ];
 
+const FITS = [
+    { label: "All", value: "" },
+    { label: "Slim", value: "slim" },
+    { label: "Regular", value: "regular" },
+    { label: "Straight", value: "straight" },
+    { label: "Oversized", value: "oversized" },
+    { label: "Relaxed", value: "relaxed" },
+    { label: "Tailored", value: "tailored" },
+];
+
 export default function ClosetScreen() {
     const router = useRouter();
     const {
@@ -49,7 +59,7 @@ export default function ClosetScreen() {
     } = useClosetHome();
     const [filtersExpanded, setFiltersExpanded] = useState(false);
 
-    const hasActiveFilters = filters.articleType !== null || filters.color !== null;
+    const hasActiveFilters = filters.articleType !== null || filters.color !== null || filters.fit !== null;
 
     if (loading) {
         return (
@@ -98,6 +108,11 @@ export default function ClosetScreen() {
                         options={COLORS}
                         selectedValue={filters.color}
                         onSelect={(v: string | null) => setFilter("color", v)}
+                    />
+                    <FilterChipRow
+                        options={FITS}
+                        selectedValue={filters.fit}
+                        onSelect={(v: string | null) => setFilter("fit", v)}
                     />
                 </View>
             )}

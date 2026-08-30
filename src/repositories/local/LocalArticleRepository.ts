@@ -12,7 +12,7 @@ function mapToArticle(model: ArticleModel): Article {
     articleType: model.articleType as Article['articleType'],
     color: model.color as Article['color'],
     fabricType: model.fabricType,
-    fit: model.fit,
+    fit: model.fit as Article['fit'],
     size: model.size,
     originalImageUrl: model.originalImageUrl,
     processedImageUrl: model.processedImageUrl,

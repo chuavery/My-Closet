@@ -1,16 +1,18 @@
 import { Stack } from "expo-router";
 import { RepositoryProvider } from "@/providers/RepositoryProvider";
+import { ThemeProvider, useTheme } from "@/providers/ThemeContext";
 import { StatusBar } from "expo-status-bar";
 
-export default function RootLayout() {
+function RootLayoutInner() {
+    const { colors, isDark } = useTheme();
     return (
-        <RepositoryProvider>
-            <StatusBar style="dark" />
+        <>
+            <StatusBar style={isDark ? "light" : "dark"} />
             <Stack
                 screenOptions={{
-                    headerStyle: { backgroundColor: "#F5F0E8" },
-                    headerTintColor: "#2C2C2C",
-                    contentStyle: { backgroundColor: "#F5F0E8" },
+                    headerStyle: { backgroundColor: colors.paper },
+                    headerTintColor: colors.ink,
+                    contentStyle: { backgroundColor: colors.paper },
                     headerBackTitle: "Back",
                 }}
             >
@@ -47,6 +49,16 @@ export default function RootLayout() {
                     options={{ title: "Outfit" }}
                 />
             </Stack>
+        </>
+    );
+}
+
+export default function RootLayout() {
+    return (
+        <RepositoryProvider>
+            <ThemeProvider>
+                <RootLayoutInner />
+            </ThemeProvider>
         </RepositoryProvider>
     );
 }

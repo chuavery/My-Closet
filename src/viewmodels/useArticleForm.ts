@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
-import { Article, ArticleType, Color, Source } from '@/models/Article';
+import { Article, ArticleType, Color, Fit, Source } from '@/models/Article';
 import { useRepositories } from '@/providers/RepositoryProvider';
 
 export interface ArticleFormData {
@@ -11,7 +11,7 @@ export interface ArticleFormData {
   articleType: ArticleType;
   color: Color;
   fabricType: string;
-  fit: string;
+  fit: Fit;
   size: string;
   originalImageUrl: string;
   processedImageUrl?: string;
@@ -25,7 +25,7 @@ const INITIAL_FORM: ArticleFormData = {
   articleType: 'shirt',
   color: 'black',
   fabricType: '',
-  fit: '',
+  fit: 'regular',
   size: '',
   originalImageUrl: '',
   storageSpaceId: null,
@@ -79,6 +79,8 @@ export function useArticleForm(articleId?: string) {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [isNew, setIsNew] = useState(!articleId);
+  const [wearCount, setWearCount] = useState(0);
+  const [lastWornAt, setLastWornAt] = useState<string | null>(null);
 
   useEffect(() => {
     if (articleId) {
@@ -91,13 +93,15 @@ export function useArticleForm(articleId?: string) {
             articleType: article.articleType,
             color: article.color,
             fabricType: article.fabricType ?? '',
-            fit: article.fit ?? '',
+            fit: (article.fit as Fit) ?? 'regular',
             size: article.size ?? '',
             originalImageUrl: article.originalImageUrl,
             processedImageUrl: article.processedImageUrl,
             storageSpaceId: article.storageSpaceId,
             source: article.source,
           });
+          setWearCount(article.wearCount);
+          setLastWornAt(article.lastWornAt);
         }
         setLoading(false);
       });
@@ -171,5 +175,7 @@ export function useArticleForm(articleId?: string) {
     loading,
     saving,
     isNew,
+    wearCount,
+    lastWornAt,
   };
 }

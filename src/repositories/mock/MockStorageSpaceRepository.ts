@@ -22,7 +22,7 @@ export class MockStorageSpaceRepository implements StorageSpaceRepository {
   ): Promise<StorageSpace> {
     const newSpace: StorageSpace = {
       ...space,
-      id: `ss-${String(spaces.length + 1).padStart(3, '0')}`,
+      id: `ss-${String(Math.max(0, ...spaces.map((s) => parseInt(s.id.split('-')[1] ?? '0', 10))) + 1).padStart(3, '0')}`,
       createdAt: new Date().toISOString(),
     };
     spaces.push(newSpace);
