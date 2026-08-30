@@ -47,6 +47,7 @@ export default function StorageScreen() {
             <FlatList<StorageSpace>
                 data={spaces}
                 keyExtractor={(item) => item.id}
+                style={styles.listContainer}
                 contentContainerStyle={styles.list}
                 renderItem={({ item }) => (
                     <StorageSpaceRow
@@ -99,6 +100,9 @@ const styles = StyleSheet.create({
     noticeText: {
         ...typography.bodySmall,
         color: colors.accentDark,
+    },
+    listContainer: {
+        flex: 1,
     },
     list: {
         paddingHorizontal: spacing.lg,

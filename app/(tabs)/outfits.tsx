@@ -40,6 +40,7 @@ export default function OutfitsScreen() {
             <FlatList
                 data={outfits}
                 keyExtractor={(item: { id: any }) => item.id}
+                style={styles.listContainer}
                 contentContainerStyle={styles.list}
                 renderItem={({ item }: { item: Outfit }) => (
                     <Pressable
@@ -83,6 +84,9 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: colors.paper,
+    },
+    listContainer: {
+        flex: 1,
     },
     list: {
         padding: spacing.lg,

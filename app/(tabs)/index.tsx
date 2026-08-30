@@ -105,6 +105,7 @@ export default function ClosetScreen() {
                 data={articles}
                 keyExtractor={(item) => item.id}
                 numColumns={2}
+                style={styles.listContainer}
                 contentContainerStyle={styles.list}
                 columnWrapperStyle={styles.row}
                 renderItem={({ item }) => (
@@ -184,6 +185,9 @@ const styles = StyleSheet.create({
     },
     filterSection: {
         marginBottom: spacing.sm,
+    },
+    listContainer: {
+        flex: 1,
     },
     list: {
         paddingHorizontal: spacing.lg,
