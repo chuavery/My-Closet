@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
 import { Article } from '@/models/Article';
 import { colors } from '@/theme/colors';
 import { typography } from '@/theme/typography';
@@ -28,16 +28,23 @@ export function ArticleCard({ article, onPress }: ArticleCardProps) {
   return (
     <Pressable style={styles.card} onPress={onPress}>
       <View style={styles.imageContainer}>
-        <View
-          style={[
-            styles.imagePlaceholder,
-            { backgroundColor: COLOR_MAP[article.color] ?? colors.paperDark },
-          ]}
-        >
-          <Text style={styles.placeholderText}>
-            {article.name?.charAt(0) ?? article.articleType.charAt(0).toUpperCase()}
-          </Text>
-        </View>
+        {article.originalImageUrl ? (
+          <Image
+            source={{ uri: article.originalImageUrl }}
+            style={styles.image}
+          />
+        ) : (
+          <View
+            style={[
+              styles.imagePlaceholder,
+              { backgroundColor: COLOR_MAP[article.color] ?? colors.paperDark },
+            ]}
+          >
+            <Text style={styles.placeholderText}>
+              {article.name?.charAt(0) ?? article.articleType.charAt(0).toUpperCase()}
+            </Text>
+          </View>
+        )}
       </View>
       <View style={styles.info}>
         <Text style={styles.name} numberOfLines={1}>
@@ -66,6 +73,11 @@ const styles = StyleSheet.create({
   imageContainer: {
     width: '100%',
     aspectRatio: 4 / 5,
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
   },
   imagePlaceholder: {
     flex: 1,

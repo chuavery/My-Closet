@@ -7,6 +7,7 @@ import {
     ScrollView,
     StyleSheet,
     ActivityIndicator,
+    Image,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useArticleForm } from "@/viewmodels/useArticleForm";
@@ -45,13 +46,38 @@ const COLOR_OPTIONS: Color[] = [
 
 export default function NewArticleScreen() {
     const router = useRouter();
-    const { form, updateField, save, saving } = useArticleForm();
+    const { form, updateField, pickImage, takePhoto, save, saving } = useArticleForm();
 
     return (
         <ScrollView
             style={styles.container}
             contentContainerStyle={styles.content}
         >
+            <Text style={styles.label}>Photo</Text>
+            <Text style={styles.hint}>A photo is required for every article.</Text>
+            {form.originalImageUrl ? (
+                <View style={styles.imagePreview}>
+                    <Image
+                        source={{ uri: form.originalImageUrl }}
+                        style={styles.previewImage}
+                    />
+                    <Pressable style={styles.changePhotoButton} onPress={pickImage}>
+                        <Text style={styles.changePhotoLabel}>Change Photo</Text>
+                    </Pressable>
+                </View>
+            ) : (
+                <View style={styles.photoButtons}>
+                    <Pressable style={styles.photoButton} onPress={takePhoto}>
+                        <Text style={styles.photoButtonIcon}>📷</Text>
+                        <Text style={styles.photoButtonLabel}>Take Photo</Text>
+                    </Pressable>
+                    <Pressable style={styles.photoButton} onPress={pickImage}>
+                        <Text style={styles.photoButtonIcon}>🖼️</Text>
+                        <Text style={styles.photoButtonLabel}>Choose from Library</Text>
+                    </Pressable>
+                </View>
+            )}
+
             <Text style={styles.label}>Name</Text>
             <TextInput
                 style={styles.input}
@@ -175,6 +201,54 @@ const styles = StyleSheet.create({
         fontWeight: "600",
         marginBottom: spacing.xs,
         marginTop: spacing.md,
+    },
+    hint: {
+        ...typography.caption,
+        color: colors.inkLight,
+        marginBottom: spacing.sm,
+    },
+    photoButtons: {
+        flexDirection: "row",
+        gap: spacing.md,
+    },
+    photoButton: {
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+        padding: spacing.lg,
+        backgroundColor: colors.white,
+        borderRadius: borderRadius.md,
+        borderWidth: 2,
+        borderColor: colors.border,
+        borderStyle: "dashed",
+    },
+    photoButtonIcon: {
+        fontSize: 32,
+        marginBottom: spacing.sm,
+    },
+    photoButtonLabel: {
+        ...typography.bodySmall,
+        color: colors.ink,
+        textAlign: "center",
+    },
+    imagePreview: {
+        alignItems: "center",
+    },
+    previewImage: {
+        width: "100%",
+        aspectRatio: 3 / 4,
+        borderRadius: borderRadius.md,
+        backgroundColor: colors.paperDark,
+    },
+    changePhotoButton: {
+        marginTop: spacing.sm,
+        paddingVertical: spacing.sm,
+        paddingHorizontal: spacing.md,
+    },
+    changePhotoLabel: {
+        ...typography.bodySmall,
+        color: colors.accent,
+        fontWeight: "600",
     },
     input: {
         ...typography.body,

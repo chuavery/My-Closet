@@ -1,4 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Alert } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
 import { Article, ArticleType, Color, Source } from '@/models/Article';
 import { useRepositories } from '@/providers/RepositoryProvider';
 
@@ -28,6 +31,47 @@ const INITIAL_FORM: ArticleFormData = {
   storageSpaceId: null,
   source: 'manual',
 };
+
+async function pickAndSaveImage(useCamera: boolean): Promise<string | null> {
+  const permissionFn = useCamera
+    ? ImagePicker.requestCameraPermissionsAsync
+    : ImagePicker.requestMediaLibraryPermissionsAsync;
+
+  const { status } = await permissionFn();
+  if (status !== 'granted') {
+    Alert.alert(
+      'Permission needed',
+      useCamera
+        ? 'Camera permission is required to take photos.'
+        : 'Photo library permission is required to select images.'
+    );
+    return null;
+  }
+
+  const launchFn = useCamera
+    ? ImagePicker.launchCameraAsync
+    : ImagePicker.launchImageLibraryAsync;
+
+  const result = await launchFn({
+    mediaTypes: ['images'],
+    quality: 0.8,
+    allowsEditing: true,
+    aspect: [3, 4],
+  });
+
+  if (result.canceled || !result.assets?.[0]) return null;
+
+  const asset = result.assets[0];
+  const filename = `article_${Date.now()}.jpg`;
+  const dest = `${FileSystem.documentDirectory}articles/${filename}`;
+
+  await FileSystem.makeDirectoryAsync(`${FileSystem.documentDirectory}articles`, {
+    intermediates: true,
+  });
+
+  await FileSystem.copyAsync({ from: asset.uri, to: dest });
+  return dest;
+}
 
 export function useArticleForm(articleId?: string) {
   const { articleRepository } = useRepositories();
@@ -67,7 +111,25 @@ export function useArticleForm(articleId?: string) {
     []
   );
 
+  const pickImage = useCallback(async () => {
+    const uri = await pickAndSaveImage(false);
+    if (uri) {
+      setForm((prev) => ({ ...prev, originalImageUrl: uri }));
+    }
+  }, []);
+
+  const takePhoto = useCallback(async () => {
+    const uri = await pickAndSaveImage(true);
+    if (uri) {
+      setForm((prev) => ({ ...prev, originalImageUrl: uri }));
+    }
+  }, []);
+
   const save = useCallback(async (): Promise<Article | null> => {
+    if (!form.originalImageUrl) {
+      Alert.alert('Photo required', 'Please add a photo before saving.');
+      return null;
+    }
     setSaving(true);
     try {
       if (isNew) {
@@ -92,6 +154,8 @@ export function useArticleForm(articleId?: string) {
   return {
     form,
     updateField,
+    pickImage,
+    takePhoto,
     save,
     remove,
     loading,
