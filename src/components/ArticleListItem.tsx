@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
 import { Article } from '@/models/Article';
+import { capitalize } from '@/lib/capitalize';
 import { colors } from '@/theme/colors';
 import { typography } from '@/theme/typography';
 import { spacing, borderRadius } from '@/theme/spacing';
@@ -48,7 +49,7 @@ export function ArticleListItem({ article, onPress }: ArticleListItemProps) {
       </View>
       <View style={styles.info}>
         <Text style={styles.name} numberOfLines={1}>
-          {article.name ?? article.articleType}
+          {article.name ?? capitalize(article.articleType)}
         </Text>
         {article.brand ? (
           <Text style={styles.brand} numberOfLines={1}>

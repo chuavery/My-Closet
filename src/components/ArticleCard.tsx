@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
 import { Article } from '@/models/Article';
 import { useTheme } from '@/providers/ThemeContext';
+import { capitalize } from '@/lib/capitalize';
 import { colors as lightColors } from '@/theme/colors';
 import { typography } from '@/theme/typography';
 import { spacing, borderRadius } from '@/theme/spacing';
@@ -61,7 +62,7 @@ export function ArticleCard({ article, onPress }: ArticleCardProps) {
       </View>
       <View style={styles.info}>
         <Text style={[styles.name, { color: colors.ink }]} numberOfLines={1}>
-          {article.name ?? article.articleType}
+          {article.name ?? capitalize(article.articleType)}
         </Text>
         {article.brand && (
           <Text style={[styles.brand, { color: colors.inkLight }]} numberOfLines={1}>
@@ -70,13 +71,13 @@ export function ArticleCard({ article, onPress }: ArticleCardProps) {
         )}
         <View style={styles.tags}>
           <View style={[styles.tag, { backgroundColor: colors.accent + "20" }]}>
-            <Text style={[styles.tagLabel, { color: colors.accent }]}>{article.articleType}</Text>
+            <Text style={[styles.tagLabel, { color: colors.accent }]}>{capitalize(article.articleType)}</Text>
           </View>
           <View style={[styles.tag, { backgroundColor: colorTagBg, ...colorTagBorder }]}>
-            <Text style={[styles.tagLabel, { color: colorTagTextColor }]}>{article.color}</Text>
+            <Text style={[styles.tagLabel, { color: colorTagTextColor }]}>{capitalize(article.color)}</Text>
           </View>
           <View style={[styles.tag, { backgroundColor: colors.accent + "20" }]}>
-            <Text style={[styles.tagLabel, { color: colors.accent }]}>{article.fit}</Text>
+            <Text style={[styles.tagLabel, { color: colors.accent }]}>{article.fit ? capitalize(article.fit) : "—"}</Text>
           </View>
         </View>
       </View>

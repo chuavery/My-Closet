@@ -12,6 +12,7 @@ import {
 import { useRouter } from "expo-router";
 import { useArticleForm } from "@/viewmodels/useArticleForm";
 import { ArticleType, Color, Fit } from "@/models/Article";
+import { capitalize } from "@/lib/capitalize";
 import { colors } from "@/theme/colors";
 import { typography } from "@/theme/typography";
 import { spacing, borderRadius } from "@/theme/spacing";
@@ -91,7 +92,7 @@ export default function NewArticleScreen() {
                         onPress={() => updateField("articleType", t)}
                     >
                         <Text style={[styles.chipLabel, form.articleType === t && styles.chipLabelSelected]}>
-                            {t}
+                            {capitalize(t)}
                         </Text>
                     </Pressable>
                 ))}
@@ -106,7 +107,7 @@ export default function NewArticleScreen() {
                         onPress={() => updateField("color", c)}
                     >
                         <Text style={[styles.chipLabel, form.color === c && styles.chipLabelSelected]}>
-                            {c}
+                            {capitalize(c)}
                         </Text>
                     </Pressable>
                 ))}
@@ -121,7 +122,7 @@ export default function NewArticleScreen() {
                         onPress={() => updateField("fit", f)}
                     >
                         <Text style={[styles.chipLabel, form.fit === f && styles.chipLabelSelected]}>
-                            {f}
+                            {capitalize(f)}
                         </Text>
                     </Pressable>
                 ))}

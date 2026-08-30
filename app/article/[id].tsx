@@ -16,6 +16,7 @@ import { useRepositories } from "@/providers/RepositoryProvider";
 import { useSettings } from "@/viewmodels/useSettings";
 import { useTheme } from "@/providers/ThemeContext";
 import { ArticleType, Color, Fit } from "@/models/Article";
+import { capitalize } from "@/lib/capitalize";
 import { StorageSpace } from "@/models/StorageSpace";
 import { colors as lightColors } from "@/theme/colors";
 import { typography } from "@/theme/typography";
@@ -131,7 +132,7 @@ export default function ArticleDetailScreen() {
 
             <View style={styles.tags}>
                 <View style={[styles.tag, { backgroundColor: colors.accent + "20" }]}>
-                    <Text style={[styles.tagLabel, { color: colors.accent }]}>{form.articleType}</Text>
+                    <Text style={[styles.tagLabel, { color: colors.accent }]}>{capitalize(form.articleType)}</Text>
                 </View>
                 <View style={[
                     styles.tag,
@@ -149,10 +150,10 @@ export default function ArticleDetailScreen() {
                                 ? colors.ink
                                 : COLOR_MAP[form.color] ?? colors.accent,
                         },
-                    ]}>{form.color}</Text>
+                    ]}>{capitalize(form.color)}</Text>
                 </View>
                 <View style={[styles.tag, { backgroundColor: colors.accent + "20" }]}>
-                    <Text style={[styles.tagLabel, { color: colors.accent }]}>{form.fit}</Text>
+                    <Text style={[styles.tagLabel, { color: colors.accent }]}>{capitalize(form.fit)}</Text>
                 </View>
             </View>
 
