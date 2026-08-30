@@ -46,7 +46,7 @@ Every repository is defined as an interface first, with two implementations:
 my-closet/
 ├── app/                              # Expo Router screens
 │   ├── (tabs)/
-│   │   ├── closet.tsx                # Closet Browser (home)
+│   │   ├── index.tsx                # Closet Browser (home)
 │   │   ├── outfits.tsx               # Outfit list
 │   │   ├── storage.tsx               # Storage Spaces list
 │   │   └── settings.tsx              # Settings (incl. Wear History toggle)
