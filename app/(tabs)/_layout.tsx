@@ -37,7 +37,7 @@ export default function TabLayout() {
                 }}
             />
             <Tabs.Screen
-                name="storage"
+                name="spaces"
                 options={{
                     title: "Storage",
                     headerTitle: "Storage Spaces",
