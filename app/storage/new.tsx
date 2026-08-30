@@ -9,7 +9,6 @@ import {
     Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { v4 as uuidv4 } from "uuid";
 import { useStorageSpaces } from "@/viewmodels/useStorageSpaces";
 import { QRTile } from "@/components/QRTile";
 import { colors } from "@/theme/colors";
@@ -23,7 +22,7 @@ export default function NewStorageSpaceScreen() {
     const [subLocation, setSubLocation] = useState("");
     const [saving, setSaving] = useState(false);
 
-    const qrCodeValue = `MYCLOSET-SS-${uuidv4().slice(0, 8).toUpperCase()}`;
+    const qrCodeValue = `MYCLOSET-SS-${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 
     const handleSave = async () => {
         if (!name.trim()) {
@@ -32,12 +31,12 @@ export default function NewStorageSpaceScreen() {
         }
         setSaving(true);
         try {
-            await createSpace({
+            const space = await createSpace({
                 name: name.trim(),
                 subLocation: subLocation.trim() || undefined,
                 qrCodeValue,
             });
-            router.back();
+            router.replace(`/storage/${space.id}`);
         } finally {
             setSaving(false);
         }

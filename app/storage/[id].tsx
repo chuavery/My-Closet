@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
     View,
     Text,
@@ -24,21 +24,47 @@ export default function StorageSpaceDetailScreen() {
     const { storageSpaceRepository, articleRepository } = useRepositories();
     const [space, setSpace] = useState<StorageSpace | null>(null);
     const [articles, setArticles] = useState<Article[]>([]);
+    const [unassignedArticles, setUnassignedArticles] = useState<Article[]>([]);
     const [loading, setLoading] = useState(true);
+    const [showPicker, setShowPicker] = useState(false);
+
+    const load = useCallback(async () => {
+        if (!id) return;
+        const [spaceData, articlesData, unassigned] = await Promise.all([
+            storageSpaceRepository.getById(id),
+            articleRepository.getByStorageSpace(id),
+            articleRepository.getUnassigned(),
+        ]);
+        setSpace(spaceData);
+        setArticles(articlesData);
+        setUnassignedArticles(unassigned);
+        setLoading(false);
+    }, [id, storageSpaceRepository, articleRepository]);
 
     useEffect(() => {
-        async function load() {
-            if (!id) return;
-            const [spaceData, articlesData] = await Promise.all([
-                storageSpaceRepository.getById(id),
-                articleRepository.getByStorageSpace(id),
-            ]);
-            setSpace(spaceData);
-            setArticles(articlesData);
-            setLoading(false);
-        }
         load();
-    }, [id, storageSpaceRepository, articleRepository]);
+    }, [load]);
+
+    const handleAssign = async (articleId: string) => {
+        if (!id) return;
+        await articleRepository.setStorageSpace(articleId, id);
+        setShowPicker(false);
+        await load();
+    };
+
+    const handleUnassign = async (articleId: string) => {
+        Alert.alert("Remove Article", "Remove this article from this space?", [
+            { text: "Cancel" },
+            {
+                text: "Remove",
+                style: "destructive",
+                onPress: async () => {
+                    await articleRepository.setStorageSpace(articleId, null);
+                    await load();
+                },
+            },
+        ]);
+    };
 
     const handleDelete = async () => {
         if (!id) return;
@@ -91,23 +117,64 @@ export default function StorageSpaceDetailScreen() {
             </Text>
             <FlatList
                 data={articles}
-                keyExtractor={(item: { id: any }) => item.id}
+                keyExtractor={(item) => item.id}
                 numColumns={2}
                 contentContainerStyle={styles.list}
                 columnWrapperStyle={styles.row}
-                renderItem={({ item }: { item: Article }) => (
-                    <ArticleCard
-                        article={item}
-                        onPress={() => router.push(`/article/${item.id}`)}
-                    />
+                renderItem={({ item }) => (
+                    <Pressable
+                        onLongPress={() => handleUnassign(item.id)}
+                    >
+                        <ArticleCard
+                            article={item}
+                            onPress={() => router.push(`/article/${item.id}`)}
+                        />
+                    </Pressable>
                 )}
                 ListEmptyComponent={
                     <Text style={styles.empty}>No articles here yet</Text>
                 }
             />
+            <Pressable style={styles.fab} onPress={() => setShowPicker(true)}>
+                <Text style={styles.fabText}>+</Text>
+            </Pressable>
             <Pressable style={styles.deleteButton} onPress={handleDelete}>
                 <Text style={styles.deleteLabel}>Delete Space</Text>
             </Pressable>
+
+            {showPicker && (
+                <View style={styles.pickerOverlay}>
+                    <View style={styles.pickerContent}>
+                        <Text style={styles.pickerTitle}>
+                            {unassignedArticles.length > 0
+                                ? "Select an article to assign"
+                                : "No unassigned articles available"}
+                        </Text>
+                        {unassignedArticles.length > 0 ? (
+                            <FlatList
+                                data={unassignedArticles}
+                                keyExtractor={(item) => item.id}
+                                numColumns={2}
+                                contentContainerStyle={styles.pickerList}
+                                columnWrapperStyle={styles.pickerRow}
+                                renderItem={({ item }) => (
+                                    <Pressable
+                                        onPress={() => handleAssign(item.id)}
+                                    >
+                                        <ArticleCard article={item} />
+                                    </Pressable>
+                                )}
+                            />
+                        ) : null}
+                        <Pressable
+                            style={styles.cancelButton}
+                            onPress={() => setShowPicker(false)}
+                        >
+                            <Text style={styles.cancelLabel}>Cancel</Text>
+                        </Pressable>
+                    </View>
+                </View>
+            )}
         </View>
     );
 }
@@ -148,7 +215,7 @@ const styles = StyleSheet.create({
     },
     list: {
         paddingHorizontal: spacing.lg,
-        paddingBottom: spacing.xl,
+        paddingBottom: 100,
     },
     row: {
         justifyContent: "space-between",
@@ -158,6 +225,26 @@ const styles = StyleSheet.create({
         color: colors.inkLight,
         textAlign: "center",
         marginTop: spacing.xxxl,
+    },
+    fab: {
+        position: "absolute",
+        right: spacing.xl,
+        bottom: spacing.xl,
+        width: 56,
+        height: 56,
+        borderRadius: 28,
+        backgroundColor: colors.accent,
+        justifyContent: "center",
+        alignItems: "center",
+        elevation: 4,
+        shadowColor: colors.ink,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+    },
+    fabText: {
+        ...typography.h2,
+        color: colors.white,
     },
     deleteButton: {
         margin: spacing.lg,
@@ -170,5 +257,41 @@ const styles = StyleSheet.create({
     deleteLabel: {
         ...typography.button,
         color: colors.error,
+    },
+    pickerOverlay: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: "rgba(0,0,0,0.5)",
+        justifyContent: "flex-end",
+    },
+    pickerContent: {
+        backgroundColor: colors.paper,
+        borderTopLeftRadius: borderRadius.lg,
+        borderTopRightRadius: borderRadius.lg,
+        maxHeight: "70%",
+        padding: spacing.lg,
+    },
+    pickerTitle: {
+        ...typography.h3,
+        color: colors.ink,
+        marginBottom: spacing.md,
+    },
+    pickerList: {
+        paddingBottom: spacing.md,
+    },
+    pickerRow: {
+        justifyContent: "space-between",
+    },
+    cancelButton: {
+        marginTop: spacing.md,
+        padding: spacing.sm,
+        alignItems: "center",
+    },
+    cancelLabel: {
+        ...typography.button,
+        color: colors.inkLight,
     },
 });
