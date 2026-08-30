@@ -17,7 +17,7 @@ export default function TabLayout() {
             }}
         >
             <Tabs.Screen
-                name="closet"
+                name="index"
                 options={{
                     title: "Closet",
                     headerTitle: "My Closet",

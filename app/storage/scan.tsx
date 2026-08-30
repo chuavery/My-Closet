@@ -81,6 +81,9 @@ export default function QRScanScreen() {
                 onBarcodeScanned={scanning ? handleBarcodeScanned : undefined}
             >
                 <View style={styles.overlay}>
+                    <Pressable style={styles.backButton} onPress={() => router.back()}>
+                        <Text style={styles.backLabel}>Back</Text>
+                    </Pressable>
                     <View style={styles.scanFrame}>
                         <View style={[styles.corner, styles.topLeft]} />
                         <View style={[styles.corner, styles.topRight]} />
@@ -119,6 +122,20 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
+    },
+    backButton: {
+        position: "absolute",
+        top: 60,
+        left: spacing.lg,
+        backgroundColor: "rgba(0,0,0,0.5)",
+        paddingVertical: spacing.sm,
+        paddingHorizontal: spacing.md,
+        borderRadius: 8,
+    },
+    backLabel: {
+        ...typography.body,
+        color: colors.white,
+        fontWeight: "600",
     },
     scanFrame: {
         width: FRAME_SIZE,
