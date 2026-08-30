@@ -30,6 +30,14 @@ export default function RootLayout() {
                     options={{ title: "Storage Space" }}
                 />
                 <Stack.Screen
+                    name="storage/new"
+                    options={{ title: "New Storage Space" }}
+                />
+                <Stack.Screen
+                    name="storage/scan"
+                    options={{ title: "Scan QR Code", presentation: "fullScreenModal" }}
+                />
+                <Stack.Screen
                     name="outfit/builder"
                     options={{ title: "Outfit Builder" }}
                 />

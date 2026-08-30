@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import QRCode from 'react-native-qrcode-svg';
 import { colors } from '@/theme/colors';
 import { typography } from '@/theme/typography';
 import { spacing, borderRadius } from '@/theme/spacing';
@@ -12,8 +13,13 @@ interface QRTileProps {
 export function QRTile({ value, label }: QRTileProps) {
   return (
     <View style={styles.container}>
-      <View style={styles.qrPlaceholder}>
-        <Text style={styles.qrText}>QR</Text>
+      <View style={styles.qrWrapper}>
+        <QRCode
+          value={value}
+          size={160}
+          color={colors.ink}
+          backgroundColor={colors.white}
+        />
       </View>
       {label && <Text style={styles.label}>{label}</Text>}
       <Text style={styles.value} numberOfLines={1}>
@@ -32,18 +38,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
-  qrPlaceholder: {
-    width: 120,
-    height: 120,
-    backgroundColor: colors.paperDark,
+  qrWrapper: {
+    padding: spacing.md,
+    backgroundColor: colors.white,
     borderRadius: borderRadius.sm,
-    justifyContent: 'center',
-    alignItems: 'center',
     marginBottom: spacing.sm,
-  },
-  qrText: {
-    ...typography.h2,
-    color: colors.inkLight,
   },
   label: {
     ...typography.bodySmall,

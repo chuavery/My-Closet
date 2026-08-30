@@ -59,6 +59,20 @@ export default function StorageScreen() {
                     <Text style={styles.empty}>No storage spaces yet</Text>
                 }
             />
+            <View style={styles.fabRow}>
+                <Pressable
+                    style={styles.scanFab}
+                    onPress={() => router.push("/storage/scan")}
+                >
+                    <Text style={styles.fabText}>Scan</Text>
+                </Pressable>
+                <Pressable
+                    style={styles.fab}
+                    onPress={() => router.push("/storage/new")}
+                >
+                    <Text style={styles.fabText}>+</Text>
+                </Pressable>
+            </View>
         </View>
     );
 }
@@ -95,5 +109,44 @@ const styles = StyleSheet.create({
         color: colors.inkLight,
         textAlign: "center",
         marginTop: spacing.xxxl,
+    },
+    fabRow: {
+        position: "absolute",
+        right: spacing.xl,
+        bottom: spacing.xl,
+        flexDirection: "row",
+        gap: spacing.md,
+    },
+    scanFab: {
+        width: 56,
+        height: 56,
+        borderRadius: 28,
+        backgroundColor: colors.white,
+        justifyContent: "center",
+        alignItems: "center",
+        elevation: 4,
+        shadowColor: colors.ink,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        borderWidth: 1,
+        borderColor: colors.border,
+    },
+    fab: {
+        width: 56,
+        height: 56,
+        borderRadius: 28,
+        backgroundColor: colors.accent,
+        justifyContent: "center",
+        alignItems: "center",
+        elevation: 4,
+        shadowColor: colors.ink,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+    },
+    fabText: {
+        ...typography.h2,
+        color: colors.ink,
     },
 });
