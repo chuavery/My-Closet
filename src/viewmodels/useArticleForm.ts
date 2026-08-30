@@ -125,9 +125,19 @@ export function useArticleForm(articleId?: string) {
     }
   }, []);
 
+  const validate = useCallback((): string | null => {
+    if (!form.originalImageUrl) return 'Please add a photo.';
+    if (!form.name.trim()) return 'Please enter a name.';
+    if (!form.brand.trim()) return 'Please enter a brand.';
+    if (!form.articleType) return 'Please select a type.';
+    if (!form.color) return 'Please select a color.';
+    return null;
+  }, [form]);
+
   const save = useCallback(async (): Promise<Article | null> => {
-    if (!form.originalImageUrl) {
-      Alert.alert('Photo required', 'Please add a photo before saving.');
+    const error = validate();
+    if (error) {
+      Alert.alert('Missing details', error);
       return null;
     }
     setSaving(true);
@@ -143,7 +153,7 @@ export function useArticleForm(articleId?: string) {
     } finally {
       setSaving(false);
     }
-  }, [isNew, articleId, form, articleRepository]);
+  }, [isNew, articleId, form, articleRepository, validate]);
 
   const remove = useCallback(async () => {
     if (articleId) {

@@ -2,13 +2,14 @@ import React, { useState, useEffect, useCallback } from "react";
 import {
     View,
     Text,
+    TextInput,
     FlatList,
     Pressable,
     StyleSheet,
     ActivityIndicator,
     Alert,
 } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter, useNavigation } from "expo-router";
 import { useRepositories } from "@/providers/RepositoryProvider";
 import { StorageSpace } from "@/models/StorageSpace";
 import { Article } from "@/models/Article";
@@ -21,11 +22,15 @@ import { spacing, borderRadius } from "@/theme/spacing";
 export default function StorageSpaceDetailScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
     const router = useRouter();
+    const navigation = useNavigation();
     const { storageSpaceRepository, articleRepository } = useRepositories();
     const [space, setSpace] = useState<StorageSpace | null>(null);
     const [articles, setArticles] = useState<Article[]>([]);
     const [unassignedArticles, setUnassignedArticles] = useState<Article[]>([]);
     const [loading, setLoading] = useState(true);
+    const [editing, setEditing] = useState(false);
+    const [editName, setEditName] = useState("");
+    const [editSubLocation, setEditSubLocation] = useState("");
     const [showPicker, setShowPicker] = useState(false);
 
     const load = useCallback(async () => {
@@ -44,6 +49,39 @@ export default function StorageSpaceDetailScreen() {
     useEffect(() => {
         load();
     }, [load]);
+
+    useEffect(() => {
+        if (space && !editing) {
+            setEditName(space.name);
+            setEditSubLocation(space.subLocation ?? "");
+        }
+    }, [space, editing]);
+
+    useEffect(() => {
+        navigation.setOptions({
+            headerRight: () => (
+                <Pressable onPress={() => setEditing(!editing)}>
+                    <Text style={styles.headerButton}>
+                        {editing ? "Cancel" : "Edit"}
+                    </Text>
+                </Pressable>
+            ),
+        });
+    }, [navigation, editing]);
+
+    const handleSave = async () => {
+        if (!id || !space) return;
+        if (!editName.trim()) {
+            Alert.alert("Name required", "Please enter a name for this storage space.");
+            return;
+        }
+        await storageSpaceRepository.update(id, {
+            name: editName.trim(),
+            subLocation: editSubLocation.trim() || undefined,
+        });
+        setEditing(false);
+        await load();
+    };
 
     const handleAssign = async (articleId: string) => {
         if (!id) return;
@@ -104,14 +142,47 @@ export default function StorageSpaceDetailScreen() {
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.name}>{space.name}</Text>
-                {space.subLocation && (
-                    <Text style={styles.subLocation}>{space.subLocation}</Text>
+                {editing ? (
+                    <>
+                        <TextInput
+                            style={styles.nameInput}
+                            value={editName}
+                            onChangeText={setEditName}
+                            placeholder="Space name"
+                            placeholderTextColor={colors.inkLight}
+                        />
+                        <TextInput
+                            style={styles.subInput}
+                            value={editSubLocation}
+                            onChangeText={setEditSubLocation}
+                            placeholder="Sub-location (optional)"
+                            placeholderTextColor={colors.inkLight}
+                        />
+                    </>
+                ) : (
+                    <>
+                        <Text style={styles.name}>{space.name}</Text>
+                        {space.subLocation && (
+                            <Text style={styles.subLocation}>{space.subLocation}</Text>
+                        )}
+                    </>
                 )}
             </View>
             <View style={styles.qrSection}>
                 <QRTile value={space.qrCodeValue} label={space.name} />
             </View>
+
+            {editing && (
+                <View style={styles.editActions}>
+                    <Pressable style={styles.saveButton} onPress={handleSave}>
+                        <Text style={styles.saveLabel}>Save Changes</Text>
+                    </Pressable>
+                    <Pressable style={styles.deleteButton} onPress={handleDelete}>
+                        <Text style={styles.deleteLabel}>Delete Space</Text>
+                    </Pressable>
+                </View>
+            )}
+
             <Text style={styles.sectionTitle}>
                 Articles ({articles.length})
             </Text>
@@ -119,11 +190,12 @@ export default function StorageSpaceDetailScreen() {
                 data={articles}
                 keyExtractor={(item) => item.id}
                 numColumns={2}
+                style={styles.listContainer}
                 contentContainerStyle={styles.list}
                 columnWrapperStyle={styles.row}
                 renderItem={({ item }) => (
                     <Pressable
-                        onLongPress={() => handleUnassign(item.id)}
+                        onLongPress={() => editing && handleUnassign(item.id)}
                     >
                         <ArticleCard
                             article={item}
@@ -135,12 +207,12 @@ export default function StorageSpaceDetailScreen() {
                     <Text style={styles.empty}>No articles here yet</Text>
                 }
             />
-            <Pressable style={styles.fab} onPress={() => setShowPicker(true)}>
-                <Text style={styles.fabText}>+</Text>
-            </Pressable>
-            <Pressable style={styles.deleteButton} onPress={handleDelete}>
-                <Text style={styles.deleteLabel}>Delete Space</Text>
-            </Pressable>
+
+            {editing && (
+                <Pressable style={styles.fab} onPress={() => setShowPicker(true)}>
+                    <Text style={styles.fabText}>+</Text>
+                </Pressable>
+            )}
 
             {showPicker && (
                 <View style={styles.pickerOverlay}>
@@ -190,6 +262,10 @@ const styles = StyleSheet.create({
         alignItems: "center",
         backgroundColor: colors.paper,
     },
+    headerButton: {
+        ...typography.buttonSmall,
+        color: colors.accent,
+    },
     header: {
         padding: spacing.lg,
         paddingBottom: 0,
@@ -203,15 +279,58 @@ const styles = StyleSheet.create({
         color: colors.inkLight,
         marginTop: spacing.xs,
     },
+    nameInput: {
+        ...typography.h2,
+        color: colors.ink,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.border,
+        paddingBottom: spacing.xs,
+    },
+    subInput: {
+        ...typography.body,
+        color: colors.ink,
+        marginTop: spacing.xs,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.border,
+        paddingBottom: spacing.xs,
+    },
     qrSection: {
         alignItems: "center",
         padding: spacing.lg,
+    },
+    editActions: {
+        paddingHorizontal: spacing.lg,
+    },
+    saveButton: {
+        backgroundColor: colors.accent,
+        paddingVertical: spacing.md,
+        borderRadius: 8,
+        alignItems: "center",
+    },
+    saveLabel: {
+        ...typography.button,
+        color: colors.white,
+    },
+    deleteButton: {
+        marginTop: spacing.md,
+        paddingVertical: spacing.md,
+        alignItems: "center",
+        borderWidth: 1,
+        borderColor: colors.error,
+        borderRadius: 8,
+    },
+    deleteLabel: {
+        ...typography.button,
+        color: colors.error,
     },
     sectionTitle: {
         ...typography.h3,
         color: colors.ink,
         paddingHorizontal: spacing.lg,
         marginBottom: spacing.sm,
+    },
+    listContainer: {
+        flex: 1,
     },
     list: {
         paddingHorizontal: spacing.lg,
@@ -245,18 +364,6 @@ const styles = StyleSheet.create({
     fabText: {
         ...typography.h2,
         color: colors.white,
-    },
-    deleteButton: {
-        margin: spacing.lg,
-        padding: spacing.md,
-        alignItems: "center",
-        borderWidth: 1,
-        borderColor: colors.error,
-        borderRadius: 8,
-    },
-    deleteLabel: {
-        ...typography.button,
-        color: colors.error,
     },
     pickerOverlay: {
         position: "absolute",

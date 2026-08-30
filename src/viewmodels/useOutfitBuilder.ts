@@ -91,6 +91,12 @@ export function useOutfitBuilder(outfitId?: string) {
     }
   }, [outfitId, outfit, outfitRepository]);
 
+  const deleteOutfit = useCallback(async () => {
+    if (outfitId) {
+      await outfitRepository.delete(outfitId);
+    }
+  }, [outfitId, outfitRepository]);
+
   return {
     outfit,
     setOutfit,
@@ -102,6 +108,7 @@ export function useOutfitBuilder(outfitId?: string) {
     addArticle,
     removeArticle,
     save,
+    deleteOutfit,
     loading,
     saving,
   };

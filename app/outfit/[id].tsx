@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
     View,
     Text,
@@ -6,13 +6,10 @@ import {
     Pressable,
     StyleSheet,
     ActivityIndicator,
-    Alert,
 } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter, useNavigation } from "expo-router";
 import { useOutfitDetail } from "@/viewmodels/useOutfitDetail";
 import { Article } from "@/models/Article";
-import { LayerSlot } from "@/components/LayerSlot";
-import { WornTodayButton } from "@/components/WornTodayButton";
 import { ArticleCard } from "@/components/ArticleCard";
 import { colors } from "@/theme/colors";
 import { typography } from "@/theme/typography";
@@ -21,16 +18,23 @@ import { spacing, borderRadius } from "@/theme/spacing";
 export default function OutfitDetailScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
     const router = useRouter();
+    const navigation = useNavigation();
     const {
         outfit,
-        outfitArticles,
         articles,
         tags,
-        wearHistoryEnabled,
         loading,
-        markWorn,
-        deleteOutfit,
     } = useOutfitDetail(id ?? "");
+
+    useEffect(() => {
+        navigation.setOptions({
+            headerRight: () => (
+                <Pressable onPress={() => router.push(`/outfit/builder?id=${id}`)}>
+                    <Text style={styles.headerButton}>Edit</Text>
+                </Pressable>
+            ),
+        });
+    }, [navigation, router, id]);
 
     if (loading) {
         return (
@@ -55,18 +59,10 @@ export default function OutfitDetailScreen() {
                 <Text style={styles.meta}>
                     {outfit.wearCount} worn
                     {outfit.lastWornAt
-                        ? ` · Last: ${new Date(
-                              outfit.lastWornAt
-                          ).toLocaleDateString()}`
+                        ? ` · Last: ${new Date(outfit.lastWornAt).toLocaleDateString()}`
                         : ""}
                 </Text>
             </View>
-
-            {wearHistoryEnabled && (
-                <View style={styles.wornSection}>
-                    <WornTodayButton onPress={markWorn} />
-                </View>
-            )}
 
             {tags.length > 0 && (
                 <View style={styles.tags}>
@@ -83,6 +79,7 @@ export default function OutfitDetailScreen() {
                 data={articles}
                 keyExtractor={(item) => item.id}
                 numColumns={2}
+                style={styles.listContainer}
                 contentContainerStyle={styles.list}
                 columnWrapperStyle={styles.row}
                 renderItem={({ item }) => (
@@ -95,25 +92,6 @@ export default function OutfitDetailScreen() {
                     <Text style={styles.empty}>No articles in this outfit</Text>
                 }
             />
-
-            <Pressable
-                style={styles.deleteButton}
-                onPress={() => {
-                    Alert.alert("Delete", "Remove this outfit?", [
-                        { text: "Cancel" },
-                        {
-                            text: "Delete",
-                            style: "destructive",
-                            onPress: async () => {
-                                await deleteOutfit();
-                                router.back();
-                            },
-                        },
-                    ]);
-                }}
-            >
-                <Text style={styles.deleteLabel}>Delete Outfit</Text>
-            </Pressable>
         </View>
     );
 }
@@ -129,6 +107,10 @@ const styles = StyleSheet.create({
         alignItems: "center",
         backgroundColor: colors.paper,
     },
+    headerButton: {
+        ...typography.buttonSmall,
+        color: colors.accent,
+    },
     header: {
         padding: spacing.lg,
         paddingBottom: 0,
@@ -141,10 +123,6 @@ const styles = StyleSheet.create({
         ...typography.bodySmall,
         color: colors.inkLight,
         marginTop: spacing.xs,
-    },
-    wornSection: {
-        padding: spacing.lg,
-        alignItems: "flex-start",
     },
     tags: {
         flexDirection: "row",
@@ -169,6 +147,9 @@ const styles = StyleSheet.create({
         marginTop: spacing.lg,
         marginBottom: spacing.sm,
     },
+    listContainer: {
+        flex: 1,
+    },
     list: {
         paddingHorizontal: spacing.lg,
         paddingBottom: spacing.xl,
@@ -181,17 +162,5 @@ const styles = StyleSheet.create({
         color: colors.inkLight,
         textAlign: "center",
         marginTop: spacing.xxxl,
-    },
-    deleteButton: {
-        margin: spacing.lg,
-        padding: spacing.md,
-        alignItems: "center",
-        borderWidth: 1,
-        borderColor: colors.error,
-        borderRadius: 8,
-    },
-    deleteLabel: {
-        ...typography.button,
-        color: colors.error,
     },
 });

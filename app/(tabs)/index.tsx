@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
     searchInput: {
         ...typography.body,
         flex: 1,
-        padding: spacing.md,
+        padding: spacing.sm,
         backgroundColor: colors.white,
         borderRadius: 8,
         borderWidth: 1,
@@ -156,8 +156,8 @@ const styles = StyleSheet.create({
         color: colors.ink,
     },
     filterButton: {
-        paddingVertical: spacing.md,
-        paddingHorizontal: spacing.lg,
+        paddingVertical: spacing.sm,
+        paddingHorizontal: spacing.md,
         borderRadius: 8,
         borderWidth: 1,
         borderColor: colors.border,
