@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
     View,
     Text,
@@ -47,6 +47,9 @@ export default function ClosetScreen() {
         setFilter,
         loading,
     } = useClosetHome();
+    const [filtersExpanded, setFiltersExpanded] = useState(false);
+
+    const hasActiveFilters = filters.articleType !== null || filters.color !== null;
 
     if (loading) {
         return (
@@ -58,23 +61,46 @@ export default function ClosetScreen() {
 
     return (
         <View style={styles.container}>
-            <TextInput
-                style={styles.search}
-                placeholder="Search articles..."
-                placeholderTextColor={colors.inkLight}
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-            />
-            <FilterChipRow
-                options={ARTICLE_TYPES}
-                selectedValue={filters.articleType}
-                onSelect={(v: string | null) => setFilter("articleType", v)}
-            />
-            <FilterChipRow
-                options={COLORS}
-                selectedValue={filters.color}
-                onSelect={(v: string | null) => setFilter("color", v)}
-            />
+            <View style={styles.searchRow}>
+                <TextInput
+                    style={styles.searchInput}
+                    placeholder="Search articles..."
+                    placeholderTextColor={colors.inkLight}
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                />
+                <Pressable
+                    style={[
+                        styles.filterButton,
+                        (filtersExpanded || hasActiveFilters) && styles.filterButtonActive,
+                    ]}
+                    onPress={() => setFiltersExpanded(!filtersExpanded)}
+                >
+                    <Text
+                        style={[
+                            styles.filterLabel,
+                            (filtersExpanded || hasActiveFilters) && styles.filterLabelActive,
+                        ]}
+                    >
+                        Filters
+                    </Text>
+                    {hasActiveFilters && <View style={styles.filterDot} />}
+                </Pressable>
+            </View>
+            {filtersExpanded && (
+                <View style={styles.filterSection}>
+                    <FilterChipRow
+                        options={ARTICLE_TYPES}
+                        selectedValue={filters.articleType}
+                        onSelect={(v: string | null) => setFilter("articleType", v)}
+                    />
+                    <FilterChipRow
+                        options={COLORS}
+                        selectedValue={filters.color}
+                        onSelect={(v: string | null) => setFilter("color", v)}
+                    />
+                </View>
+            )}
             <FlatList<Article>
                 data={articles}
                 keyExtractor={(item) => item.id}
@@ -112,15 +138,52 @@ const styles = StyleSheet.create({
         alignItems: "center",
         backgroundColor: colors.paper,
     },
-    search: {
-        ...typography.body,
+    searchRow: {
+        flexDirection: "row",
+        alignItems: "center",
         margin: spacing.lg,
+        gap: spacing.sm,
+    },
+    searchInput: {
+        ...typography.body,
+        flex: 1,
         padding: spacing.md,
         backgroundColor: colors.white,
         borderRadius: 8,
         borderWidth: 1,
         borderColor: colors.border,
         color: colors.ink,
+    },
+    filterButton: {
+        paddingVertical: spacing.md,
+        paddingHorizontal: spacing.lg,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: colors.border,
+        backgroundColor: colors.white,
+        flexDirection: "row",
+        alignItems: "center",
+    },
+    filterButtonActive: {
+        backgroundColor: colors.accent,
+        borderColor: colors.accent,
+    },
+    filterLabel: {
+        ...typography.buttonSmall,
+        color: colors.ink,
+    },
+    filterLabelActive: {
+        color: colors.white,
+    },
+    filterDot: {
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+        backgroundColor: colors.white,
+        marginLeft: spacing.xs,
+    },
+    filterSection: {
+        marginBottom: spacing.sm,
     },
     list: {
         paddingHorizontal: spacing.lg,
