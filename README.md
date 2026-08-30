@@ -21,7 +21,7 @@ My Closet solves three connected problems: knowing what you own, knowing where i
 | Layer                 | Choice                                                     |
 | --------------------- | ---------------------------------------------------------- |
 | Mobile app            | React Native + Expo                                        |
-| Local database        | WatermelonDB               |
+| Local database        | WatermelonDB                                               |
 | Image storage         | On-device sandboxed file storage                           |
 | Auth                  | None in v1 — accounts arrive with cloud sync (see Roadmap) |
 | On-device AI (future) | Core ML / TensorFlow Lite, fetched on first use            |
@@ -89,3 +89,16 @@ Requires [Node.js](https://nodejs.org/) and the [Expo Go](https://expo.dev/clien
 
 -   Image upload/capture for Article Storage
 -   QR Generator & Scanner
+
+**08/30/2026 2:58 PM**
+
+✅ ACCOMPLISHED
+
+-   Image upload/capture for Article Storage
+-   QR Generator & Scanner
+
+_Note: Essentially, the MVP is done. It's just not very pretty._
+
+🖊 NEXT IN PROGRESS
+
+-   UI Fixes
