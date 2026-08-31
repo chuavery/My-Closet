@@ -37,12 +37,12 @@ export default function OutfitsScreen() {
 
     return (
         <View style={styles.container}>
-            <FlatList
+            <FlatList<Outfit>
                 data={outfits}
-                keyExtractor={(item: { id: any }) => item.id}
+                keyExtractor={(item) => item.id}
                 style={styles.listContainer}
                 contentContainerStyle={styles.list}
-                renderItem={({ item }: { item: Outfit }) => (
+                renderItem={({ item }) => (
                     <Pressable
                         style={styles.card}
                         onPress={() => router.push(`/outfit/${item.id}`)}
