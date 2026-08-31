@@ -15,7 +15,7 @@ import { StorageSpace } from "@/models/StorageSpace";
 import { Article } from "@/models/Article";
 import { ArticleCard } from "@/components/ArticleCard";
 import { QRTile } from "@/components/QRTile";
-import { colors } from "@/theme/colors";
+import { useTheme } from "@/providers/ThemeContext";
 import { typography } from "@/theme/typography";
 import { spacing, borderRadius } from "@/theme/spacing";
 import { Plus, Pencil } from "lucide-react-native";
@@ -24,6 +24,7 @@ export default function StorageSpaceDetailScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
     const router = useRouter();
     const navigation = useNavigation();
+    const { colors } = useTheme();
     const { storageSpaceRepository, articleRepository } = useRepositories();
     const [space, setSpace] = useState<StorageSpace | null>(null);
     const [articles, setArticles] = useState<Article[]>([]);
@@ -63,14 +64,14 @@ export default function StorageSpaceDetailScreen() {
             headerRight: () => (
                 <Pressable onPress={() => setEditing(!editing)}>
                     {editing ? (
-                        <Text style={styles.headerButton}>Cancel</Text>
+                        <Text style={[styles.headerButtonText, { color: colors.accent }]}>Cancel</Text>
                     ) : (
                         <Pencil size={20} color={colors.accent} />
                     )}
                 </Pressable>
             ),
         });
-    }, [navigation, editing]);
+    }, [navigation, editing, colors.accent]);
 
     const handleSave = async () => {
         if (!id || !space) return;
@@ -128,7 +129,7 @@ export default function StorageSpaceDetailScreen() {
 
     if (loading) {
         return (
-            <View style={styles.center}>
+            <View style={[styles.center, { backgroundColor: colors.background }]}>
                 <ActivityIndicator size="large" color={colors.accent} />
             </View>
         );
@@ -136,37 +137,39 @@ export default function StorageSpaceDetailScreen() {
 
     if (!space) {
         return (
-            <View style={styles.center}>
-                <Text style={styles.empty}>Space not found</Text>
+            <View style={[styles.center, { backgroundColor: colors.background }]}>
+                <Text style={[styles.empty, { color: colors.inkSecondary }]}>Space not found</Text>
             </View>
         );
     }
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: colors.background }]}>
             <View style={styles.header}>
                 {editing ? (
                     <>
                         <TextInput
-                            style={styles.nameInput}
+                            style={[styles.nameInput, { color: colors.inkPrimary, borderBottomColor: colors.border }]}
                             value={editName}
                             onChangeText={setEditName}
                             placeholder="Space name"
-                            placeholderTextColor={colors.inkLight}
+                            placeholderTextColor={colors.inkMuted}
                         />
                         <TextInput
-                            style={styles.subInput}
+                            style={[styles.subInput, { color: colors.inkPrimary, borderBottomColor: colors.border }]}
                             value={editSubLocation}
                             onChangeText={setEditSubLocation}
                             placeholder="Sub-location (optional)"
-                            placeholderTextColor={colors.inkLight}
+                            placeholderTextColor={colors.inkMuted}
                         />
                     </>
                 ) : (
                     <>
-                        <Text style={styles.name}>{space.name}</Text>
+                        <Text style={[styles.name, { color: colors.inkPrimary }]}>{space.name}</Text>
                         {space.subLocation && (
-                            <Text style={styles.subLocation}>{space.subLocation}</Text>
+                            <Text style={[styles.subLocation, { color: colors.inkSecondary }]}>
+                                {space.subLocation}
+                            </Text>
                         )}
                     </>
                 )}
@@ -177,16 +180,13 @@ export default function StorageSpaceDetailScreen() {
 
             {editing && (
                 <View style={styles.editActions}>
-                    <Pressable style={styles.saveButton} onPress={handleSave}>
-                        <Text style={styles.saveLabel}>Save Changes</Text>
-                    </Pressable>
-                    <Pressable style={styles.deleteButton} onPress={handleDelete}>
-                        <Text style={styles.deleteLabel}>Delete Space</Text>
+                    <Pressable style={[styles.saveButton, { backgroundColor: colors.accent }]} onPress={handleSave}>
+                        <Text style={[styles.saveLabel, { color: colors.surface }]}>Save Changes</Text>
                     </Pressable>
                 </View>
             )}
 
-            <Text style={styles.sectionTitle}>
+            <Text style={[styles.sectionTitle, { color: colors.inkPrimary }]}>
                 Articles ({articles.length})
             </Text>
             <FlatList
@@ -207,20 +207,29 @@ export default function StorageSpaceDetailScreen() {
                     </Pressable>
                 )}
                 ListEmptyComponent={
-                    <Text style={styles.empty}>No articles here yet</Text>
+                    <Text style={[styles.empty, { color: colors.inkSecondary }]}>No articles here yet</Text>
                 }
             />
 
             {editing && (
-                <Pressable style={styles.fab} onPress={() => setShowPicker(true)}>
-                    <Plus size={24} color={colors.white} />
+                <Pressable style={[styles.fab, { backgroundColor: colors.accent, shadowColor: colors.inkPrimary }]} onPress={() => setShowPicker(true)}>
+                    <Plus size={24} color={colors.surface} />
+                </Pressable>
+            )}
+
+            {editing && (
+                <Pressable
+                    style={[styles.deleteButton, { borderColor: colors.destructive }]}
+                    onPress={handleDelete}
+                >
+                    <Text style={[styles.deleteLabel, { color: colors.destructive }]}>Delete Space</Text>
                 </Pressable>
             )}
 
             {showPicker && (
-                <View style={styles.pickerOverlay}>
-                    <View style={styles.pickerContent}>
-                        <Text style={styles.pickerTitle}>
+                <View style={[styles.pickerOverlay, { backgroundColor: colors.overlay }]}>
+                    <View style={[styles.pickerContent, { backgroundColor: colors.background }]}>
+                        <Text style={[styles.pickerTitle, { color: colors.inkPrimary }]}>
                             {unassignedArticles.length > 0
                                 ? "Select an article to assign"
                                 : "No unassigned articles available"}
@@ -245,7 +254,7 @@ export default function StorageSpaceDetailScreen() {
                             style={styles.cancelButton}
                             onPress={() => setShowPicker(false)}
                         >
-                            <Text style={styles.cancelLabel}>Cancel</Text>
+                            <Text style={[styles.cancelLabel, { color: colors.inkSecondary }]}>Cancel</Text>
                         </Pressable>
                     </View>
                 </View>
@@ -257,17 +266,14 @@ export default function StorageSpaceDetailScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.paper,
     },
     center: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: colors.paper,
     },
-    headerButton: {
+    headerButtonText: {
         ...typography.buttonSmall,
-        color: colors.accent,
     },
     header: {
         padding: spacing.lg,
@@ -275,26 +281,20 @@ const styles = StyleSheet.create({
     },
     name: {
         ...typography.h2,
-        color: colors.ink,
     },
     subLocation: {
         ...typography.body,
-        color: colors.inkLight,
         marginTop: spacing.xs,
     },
     nameInput: {
         ...typography.h2,
-        color: colors.ink,
         borderBottomWidth: 1,
-        borderBottomColor: colors.border,
         paddingBottom: spacing.xs,
     },
     subInput: {
         ...typography.body,
-        color: colors.ink,
         marginTop: spacing.xs,
         borderBottomWidth: 1,
-        borderBottomColor: colors.border,
         paddingBottom: spacing.xs,
     },
     qrSection: {
@@ -305,30 +305,26 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.lg,
     },
     saveButton: {
-        backgroundColor: colors.accent,
         paddingVertical: spacing.md,
         borderRadius: 8,
         alignItems: "center",
     },
     saveLabel: {
         ...typography.button,
-        color: colors.white,
     },
     deleteButton: {
+        marginHorizontal: spacing.lg,
         marginTop: spacing.md,
         paddingVertical: spacing.md,
         alignItems: "center",
         borderWidth: 1,
-        borderColor: colors.error,
         borderRadius: 8,
     },
     deleteLabel: {
         ...typography.button,
-        color: colors.error,
     },
     sectionTitle: {
         ...typography.h3,
-        color: colors.ink,
         paddingHorizontal: spacing.lg,
         marginBottom: spacing.sm,
     },
@@ -344,7 +340,6 @@ const styles = StyleSheet.create({
     },
     empty: {
         ...typography.body,
-        color: colors.inkLight,
         textAlign: "center",
         marginTop: spacing.xxxl,
     },
@@ -355,11 +350,9 @@ const styles = StyleSheet.create({
         width: 56,
         height: 56,
         borderRadius: 28,
-        backgroundColor: colors.accent,
         justifyContent: "center",
         alignItems: "center",
         elevation: 4,
-        shadowColor: colors.ink,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
         shadowRadius: 4,
@@ -370,11 +363,9 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: "rgba(0,0,0,0.5)",
         justifyContent: "flex-end",
     },
     pickerContent: {
-        backgroundColor: colors.paper,
         borderTopLeftRadius: borderRadius.lg,
         borderTopRightRadius: borderRadius.lg,
         maxHeight: "70%",
@@ -382,7 +373,6 @@ const styles = StyleSheet.create({
     },
     pickerTitle: {
         ...typography.h3,
-        color: colors.ink,
         marginBottom: spacing.md,
     },
     pickerList: {
@@ -398,6 +388,5 @@ const styles = StyleSheet.create({
     },
     cancelLabel: {
         ...typography.button,
-        color: colors.inkLight,
     },
 });

@@ -11,12 +11,13 @@ import {
 import { useRouter } from "expo-router";
 import { useStorageSpaces } from "@/viewmodels/useStorageSpaces";
 import { QRTile } from "@/components/QRTile";
-import { colors } from "@/theme/colors";
+import { useTheme } from "@/providers/ThemeContext";
 import { typography } from "@/theme/typography";
 import { spacing, borderRadius } from "@/theme/spacing";
 
 export default function NewStorageSpaceScreen() {
     const router = useRouter();
+    const { colors } = useTheme();
     const { createSpace } = useStorageSpaces();
     const [name, setName] = useState("");
     const [subLocation, setSubLocation] = useState("");
@@ -44,29 +45,29 @@ export default function NewStorageSpaceScreen() {
 
     return (
         <ScrollView
-            style={styles.container}
+            style={[styles.container, { backgroundColor: colors.background }]}
             contentContainerStyle={styles.content}
         >
-            <Text style={styles.label}>Space Name</Text>
+            <Text style={[styles.label, { color: colors.inkSecondary }]}>Space Name</Text>
             <TextInput
-                style={styles.input}
+                style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.inkPrimary }]}
                 value={name}
                 onChangeText={setName}
                 placeholder='e.g. "Top Shelf" or "Blue Bin"'
-                placeholderTextColor={colors.inkLight}
+                placeholderTextColor={colors.inkMuted}
             />
 
-            <Text style={styles.label}>Sub-location (optional)</Text>
+            <Text style={[styles.label, { color: colors.inkSecondary }]}>Sub-location (optional)</Text>
             <TextInput
-                style={styles.input}
+                style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.inkPrimary }]}
                 value={subLocation}
                 onChangeText={setSubLocation}
                 placeholder='e.g. "Left side" or "Drawer 2"'
-                placeholderTextColor={colors.inkLight}
+                placeholderTextColor={colors.inkMuted}
             />
 
-            <Text style={styles.label}>QR Code</Text>
-            <Text style={styles.hint}>
+            <Text style={[styles.label, { color: colors.inkSecondary }]}>QR Code</Text>
+            <Text style={[styles.hint, { color: colors.inkSecondary }]}>
                 This QR code will be generated for this space. Print or display
                 it to locate articles.
             </Text>
@@ -75,11 +76,11 @@ export default function NewStorageSpaceScreen() {
             </View>
 
             <Pressable
-                style={[styles.saveButton, saving && styles.disabled]}
+                style={[styles.saveButton, { backgroundColor: colors.accent }, saving && styles.disabled]}
                 onPress={handleSave}
                 disabled={saving}
             >
-                <Text style={styles.saveLabel}>
+                <Text style={[styles.saveLabel, { color: colors.surface }]}>
                     {saving ? "Saving..." : "Create Space"}
                 </Text>
             </Pressable>
@@ -90,7 +91,6 @@ export default function NewStorageSpaceScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.paper,
     },
     content: {
         padding: spacing.lg,
@@ -98,24 +98,19 @@ const styles = StyleSheet.create({
     },
     label: {
         ...typography.bodySmall,
-        color: colors.inkLight,
         fontWeight: "600",
         marginBottom: spacing.xs,
         marginTop: spacing.md,
     },
     hint: {
         ...typography.caption,
-        color: colors.inkLight,
         marginBottom: spacing.sm,
     },
     input: {
         ...typography.body,
         padding: spacing.md,
-        backgroundColor: colors.white,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: colors.border,
-        color: colors.ink,
     },
     qrSection: {
         alignItems: "center",
@@ -124,7 +119,6 @@ const styles = StyleSheet.create({
     },
     saveButton: {
         marginTop: spacing.xxl,
-        backgroundColor: colors.accent,
         paddingVertical: spacing.md,
         borderRadius: 8,
         alignItems: "center",
@@ -134,6 +128,5 @@ const styles = StyleSheet.create({
     },
     saveLabel: {
         ...typography.button,
-        color: colors.white,
     },
 });

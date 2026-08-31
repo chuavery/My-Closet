@@ -51,7 +51,7 @@ export default function SettingsScreen() {
                 <Text
                   style={[
                     styles.themeChipLabel,
-                    { color: isActive ? lightColors.white : colors.ink },
+                    { color: isActive ? colors.white : colors.ink },
                   ]}
                 >
                   {opt.label}
@@ -74,7 +74,7 @@ export default function SettingsScreen() {
             value={settings.wearHistoryEnabled}
             onValueChange={toggleWearHistory}
             trackColor={{ false: colors.border, true: colors.accentLight }}
-            thumbColor={settings.wearHistoryEnabled ? colors.accent : lightColors.white}
+            thumbColor={settings.wearHistoryEnabled ? colors.accent : colors.white}
           />
         </View>
       </View>

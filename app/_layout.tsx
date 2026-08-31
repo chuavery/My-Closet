@@ -4,6 +4,7 @@ import { ThemeProvider, useTheme } from "@/providers/ThemeContext";
 import { StatusBar } from "expo-status-bar";
 import { ChevronLeft } from "lucide-react-native";
 import { Pressable } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 function RootLayoutInner() {
     const { colors, isDark } = useTheme();
@@ -63,10 +64,12 @@ function RootLayoutInner() {
 
 export default function RootLayout() {
     return (
-        <RepositoryProvider>
-            <ThemeProvider>
-                <RootLayoutInner />
-            </ThemeProvider>
-        </RepositoryProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+            <RepositoryProvider>
+                <ThemeProvider>
+                    <RootLayoutInner />
+                </ThemeProvider>
+            </RepositoryProvider>
+        </GestureHandlerRootView>
     );
 }

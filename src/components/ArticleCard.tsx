@@ -1,46 +1,35 @@
-import React from 'react';
-import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
+import React, { useRef } from 'react';
+import { View, Text, StyleSheet, Pressable, Image, Animated } from 'react-native';
+import { Swipeable } from 'react-native-gesture-handler';
 import { Article } from '@/models/Article';
 import { useTheme } from '@/providers/ThemeContext';
 import { capitalize } from '@/lib/capitalize';
-import { colors as lightColors } from '@/theme/colors';
+import { ARTICLE_COLORS } from '@/theme/colors';
 import { typography } from '@/theme/typography';
 import { spacing, borderRadius } from '@/theme/spacing';
+import { typeTagStyles, fitTagStyles, colorTagStyles } from '@/theme/chipStyles';
+import { Trash2 } from 'lucide-react-native';
 
 interface ArticleCardProps {
   article: Article;
   onPress?: () => void;
+  onDelete?: () => void;
 }
 
-const COLOR_MAP: Record<string, string> = {
-  red: '#C45B3E',
-  orange: '#E88A4A',
-  yellow: '#E8C84A',
-  green: '#5A8F6A',
-  blue: '#4A7AE8',
-  indigo: '#5A4AE8',
-  violet: '#8A4AE8',
-  pink: '#E87AB0',
-  white: '#F0EDE6',
-  brown: '#8B6F47',
-  black: '#2C2C2C',
-};
-
-export function ArticleCard({ article, onPress }: ArticleCardProps) {
+function CardInner({ article, onPress }: { article: Article; onPress?: () => void }) {
   const { colors, isDark } = useTheme();
-  const isWhiteColor = article.color === 'white';
-  const colorTagBg = isWhiteColor && !isDark
-    ? 'transparent'
-    : (COLOR_MAP[article.color] ?? colors.accent) + "20";
-  const colorTagBorder = isWhiteColor && !isDark
-    ? { borderWidth: 1, borderColor: colors.border }
-    : {};
-  const colorTagTextColor = isWhiteColor && !isDark
-    ? colors.ink
-    : COLOR_MAP[article.color] ?? colors.accent;
+
+  const typeStyle = typeTagStyles(colors);
+  const fitStyle = fitTagStyles(colors);
+  const colorStyle = colorTagStyles(
+    colors,
+    ARTICLE_COLORS[article.color] ?? colors.accent,
+    article.color === 'white',
+    isDark
+  );
 
   return (
-    <Pressable style={[styles.card, { backgroundColor: colors.white, borderColor: colors.border }]} onPress={onPress}>
+    <Pressable style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]} onPress={onPress}>
       <View style={styles.imageContainer}>
         {article.originalImageUrl ? (
           <Image
@@ -51,37 +40,73 @@ export function ArticleCard({ article, onPress }: ArticleCardProps) {
           <View
             style={[
               styles.imagePlaceholder,
-              { backgroundColor: COLOR_MAP[article.color] ?? colors.paperDark },
+              { backgroundColor: ARTICLE_COLORS[article.color] ?? colors.paperDark },
             ]}
           >
-            <Text style={styles.placeholderText}>
+            <Text style={[styles.placeholderText, { color: colors.surface }]}>
               {article.name?.charAt(0) ?? article.articleType.charAt(0).toUpperCase()}
             </Text>
           </View>
         )}
       </View>
       <View style={styles.info}>
-        <Text style={[styles.name, { color: colors.ink }]} numberOfLines={1}>
+        <Text style={[styles.name, { color: colors.inkPrimary }]} numberOfLines={2}>
           {article.name ?? capitalize(article.articleType)}
         </Text>
         {article.brand && (
-          <Text style={[styles.brand, { color: colors.inkLight }]} numberOfLines={1}>
+          <Text style={[styles.brand, { color: colors.inkSecondary }]} numberOfLines={1}>
             {article.brand}
           </Text>
         )}
         <View style={styles.tags}>
-          <View style={[styles.tag, { backgroundColor: colors.accent + "20" }]}>
-            <Text style={[styles.tagLabel, { color: colors.accent }]}>{capitalize(article.articleType)}</Text>
+          <View style={typeStyle.container}>
+            <Text style={typeStyle.label}>{capitalize(article.articleType)}</Text>
           </View>
-          <View style={[styles.tag, { backgroundColor: colorTagBg, ...colorTagBorder }]}>
-            <Text style={[styles.tagLabel, { color: colorTagTextColor }]}>{capitalize(article.color)}</Text>
+          <View style={colorStyle.container}>
+            <Text style={colorStyle.label}>{capitalize(article.color)}</Text>
           </View>
-          <View style={[styles.tag, { backgroundColor: colors.accent + "20" }]}>
-            <Text style={[styles.tagLabel, { color: colors.accent }]}>{article.fit ? capitalize(article.fit) : "—"}</Text>
+          <View style={fitStyle.container}>
+            <Text style={fitStyle.label}>{article.fit ? capitalize(article.fit) : "—"}</Text>
           </View>
         </View>
       </View>
     </Pressable>
+  );
+}
+
+export function ArticleCard({ article, onPress, onDelete }: ArticleCardProps) {
+  const { colors } = useTheme();
+  const swipeableRef = useRef<Swipeable>(null);
+
+  if (!onDelete) {
+    return <CardInner article={article} onPress={onPress} />;
+  }
+
+  const renderRightActions = (progress: Animated.AnimatedInterpolation<number>) => {
+    const translateX = progress.interpolate({
+      inputRange: [0, 1],
+      outputRange: [80, 0],
+    });
+
+    return (
+      <Animated.View style={[styles.deleteAction, { transform: [{ translateX }] }]}>
+        <Pressable
+          style={[styles.deleteButton, { backgroundColor: colors.destructive }]}
+          onPress={() => {
+            swipeableRef.current?.close();
+            onDelete();
+          }}
+        >
+          <Trash2 size={20} color={colors.surface} />
+        </Pressable>
+      </Animated.View>
+    );
+  };
+
+  return (
+    <Swipeable ref={swipeableRef} renderRightActions={renderRightActions} overshootRight={false}>
+      <CardInner article={article} onPress={onPress} />
+    </Swipeable>
   );
 }
 
@@ -109,7 +134,6 @@ const styles = StyleSheet.create({
   },
   placeholderText: {
     ...typography.h1,
-    color: lightColors.white,
     opacity: 0.8,
   },
   info: {
@@ -129,13 +153,17 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
     marginTop: spacing.xs,
   },
-  tag: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
-    borderRadius: borderRadius.round,
+  deleteAction: {
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+    marginBottom: spacing.md,
+    marginLeft: spacing.sm,
   },
-  tagLabel: {
-    ...typography.caption,
-    fontSize: 10,
+  deleteButton: {
+    width: 56,
+    height: '100%',
+    borderRadius: borderRadius.md,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

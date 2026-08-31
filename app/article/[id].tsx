@@ -19,7 +19,7 @@ import { useTheme } from "@/providers/ThemeContext";
 import { ArticleType, Color, Fit } from "@/models/Article";
 import { capitalize } from "@/lib/capitalize";
 import { StorageSpace } from "@/models/StorageSpace";
-import { colors as lightColors } from "@/theme/colors";
+import { ARTICLE_COLORS } from "@/theme/colors";
 import { typography } from "@/theme/typography";
 import { spacing, borderRadius } from "@/theme/spacing";
 
@@ -37,20 +37,6 @@ const FIT_OPTIONS: Fit[] = [
     "slim", "regular", "straight", "oversized", "relaxed", "tailored",
 ];
 
-const COLOR_MAP: Record<string, string> = {
-    red: '#C45B3E',
-    orange: '#E88A4A',
-    yellow: '#E8C84A',
-    green: '#5A8F6A',
-    blue: '#4A7AE8',
-    indigo: '#5A4AE8',
-    violet: '#8A4AE8',
-    pink: '#E87AB0',
-    white: '#F0EDE6',
-    brown: '#8B6F47',
-    black: '#2C2C2C',
-};
-
 export default function ArticleDetailScreen() {
     const router = useRouter();
     const navigation = useNavigation();
@@ -60,7 +46,7 @@ export default function ArticleDetailScreen() {
 
     const { storageSpaceRepository } = useRepositories();
     const { settings } = useSettings();
-    const { colors, isDark } = useTheme();
+    const { colors } = useTheme();
     const [spaces, setSpaces] = useState<StorageSpace[]>([]);
     const [editing, setEditing] = useState(isNew);
     const [showSpacePicker, setShowSpacePicker] = useState(false);
@@ -76,7 +62,7 @@ export default function ArticleDetailScreen() {
                 return (
                     <Pressable onPress={() => setEditing(!editing)}>
                         {editing ? (
-                            <Text style={styles.headerButton}>Cancel</Text>
+                            <Text style={[styles.headerButtonText, { color: colors.accent }]}>Cancel</Text>
                         ) : (
                             <Pencil size={20} color={colors.accent} />
                         )}
@@ -84,7 +70,7 @@ export default function ArticleDetailScreen() {
                 );
             },
         });
-    }, [navigation, editing, isNew]);
+    }, [navigation, editing, isNew, colors.accent]);
 
     useEffect(() => {
         navigation.setOptions({ title: form.name || "Article" });
@@ -94,7 +80,7 @@ export default function ArticleDetailScreen() {
 
     if (loading) {
         return (
-            <View style={styles.center}>
+            <View style={[styles.center, { backgroundColor: colors.background }]}>
                 <ActivityIndicator size="large" color={colors.accent} />
             </View>
         );
@@ -102,10 +88,9 @@ export default function ArticleDetailScreen() {
 
     return (
         <ScrollView
-            style={[styles.container, { backgroundColor: colors.paper }]}
+            style={[styles.container, { backgroundColor: colors.background }]}
             contentContainerStyle={styles.content}
         >
-            <Text style={[styles.label, { color: colors.inkLight }]}>Photo</Text>
             {form.originalImageUrl ? (
                 <View style={styles.imagePreview}>
                     <Image
@@ -114,157 +99,160 @@ export default function ArticleDetailScreen() {
                     />
                     {editing && (
                         <Pressable style={styles.changePhotoButton} onPress={pickImage}>
-                            <Text style={styles.changePhotoLabel}>Change Photo</Text>
+                            <Text style={[styles.changePhotoLabel, { color: colors.accent }]}>Change Photo</Text>
                         </Pressable>
                     )}
                 </View>
             ) : editing ? (
                 <View style={styles.photoButtons}>
-                    <Pressable style={styles.photoButton} onPress={takePhoto}>
-                        <Camera size={24} color={colors.ink} />
-                        <Text style={styles.photoButtonLabel}>Take Photo</Text>
+                    <Pressable style={[styles.photoButton, { borderColor: colors.border, backgroundColor: colors.surface }]} onPress={takePhoto}>
+                        <Camera size={24} color={colors.inkPrimary} />
+                        <Text style={[styles.photoButtonLabel, { color: colors.inkPrimary }]}>Take Photo</Text>
                     </Pressable>
-                    <Pressable style={styles.photoButton} onPress={pickImage}>
-                        <ImageIcon size={24} color={colors.ink} />
-                        <Text style={styles.photoButtonLabel}>Choose from Library</Text>
+                    <Pressable style={[styles.photoButton, { borderColor: colors.border, backgroundColor: colors.surface }]} onPress={pickImage}>
+                        <ImageIcon size={24} color={colors.inkPrimary} />
+                        <Text style={[styles.photoButtonLabel, { color: colors.inkPrimary }]}>Choose from Library</Text>
                     </Pressable>
                 </View>
             ) : (
-                <Text style={styles.emptyValue}>No photo</Text>
+                <Text style={[styles.emptyValue, { color: colors.inkMuted }]}>No photo</Text>
             )}
 
             <View style={styles.tags}>
-                <View style={[styles.tag, { backgroundColor: colors.accent + "20" }]}>
+                <View style={[styles.tag, { backgroundColor: colors.accent + "15" }]}>
                     <Text style={[styles.tagLabel, { color: colors.accent }]}>{capitalize(form.articleType)}</Text>
                 </View>
                 <View style={[
                     styles.tag,
                     {
-                        backgroundColor: form.color === 'white' && !isDark
+                        backgroundColor: form.color === 'white'
                             ? 'transparent'
-                            : (COLOR_MAP[form.color] ?? colors.accent) + "20",
-                        ...(form.color === 'white' && !isDark ? { borderWidth: 1, borderColor: colors.border } : {}),
+                            : (ARTICLE_COLORS[form.color] ?? colors.accent) + "15",
+                        ...(form.color === 'white' ? { borderWidth: 1, borderColor: colors.border } : {}),
                     },
                 ]}>
                     <Text style={[
                         styles.tagLabel,
                         {
-                            color: form.color === 'white' && !isDark
-                                ? colors.ink
-                                : COLOR_MAP[form.color] ?? colors.accent,
+                            color: form.color === 'white'
+                                ? colors.inkPrimary
+                                : ARTICLE_COLORS[form.color] ?? colors.accent,
                         },
                     ]}>{capitalize(form.color)}</Text>
                 </View>
-                <View style={[styles.tag, { backgroundColor: colors.accent + "20" }]}>
+                <View style={[styles.tag, { backgroundColor: colors.accent + "15" }]}>
                     <Text style={[styles.tagLabel, { color: colors.accent }]}>{capitalize(form.fit)}</Text>
                 </View>
             </View>
 
-            <Text style={[styles.label, { color: colors.inkLight }]}>Name</Text>
-            <Text style={[styles.value, { color: colors.ink }]}>{form.name || "—"}</Text>
+            <Text style={[styles.sectionHeader, { color: colors.inkSecondary }]}>Details</Text>
+            <Text style={[styles.label, { color: colors.inkSecondary }]}>Name</Text>
+            <Text style={[styles.value, { color: colors.inkPrimary }]}>{form.name || "---"}</Text>
 
-            <Text style={[styles.label, { color: colors.inkLight }]}>Brand</Text>
-            <Text style={[styles.value, { color: colors.ink }]}>{form.brand || "—"}</Text>
+            <Text style={[styles.label, { color: colors.inkSecondary }]}>Brand</Text>
+            <Text style={[styles.value, { color: colors.inkPrimary }]}>{form.brand || "---"}</Text>
 
-            <Text style={[styles.label, { color: colors.inkLight }]}>Size</Text>
-            <Text style={[styles.value, { color: colors.ink }]}>{form.size || "—"}</Text>
+            <Text style={[styles.label, { color: colors.inkSecondary }]}>Size</Text>
+            <Text style={[styles.value, { color: colors.inkPrimary }]}>{form.size || "---"}</Text>
 
-            <Text style={[styles.label, { color: colors.inkLight }]}>Fabric</Text>
-            <Text style={[styles.value, { color: colors.ink }]}>{form.fabricType || "—"}</Text>
+            <Text style={[styles.label, { color: colors.inkSecondary }]}>Fabric</Text>
+            <Text style={[styles.value, { color: colors.inkPrimary }]}>{form.fabricType || "---"}</Text>
 
             {settings.wearHistoryEnabled && (
                 <>
-                    <Text style={[styles.label, { color: colors.inkLight }]}>Wear Count</Text>
-                    <Text style={[styles.value, { color: colors.ink }]}>{wearCount}</Text>
+                    <Text style={[styles.sectionHeader, { color: colors.inkSecondary }]}>Wear Tracking</Text>
+                    <Text style={[styles.label, { color: colors.inkSecondary }]}>Wear Count</Text>
+                    <Text style={[styles.value, { color: colors.inkPrimary }]}>{wearCount}</Text>
 
-                    <Text style={[styles.label, { color: colors.inkLight }]}>Last Worn</Text>
-                    <Text style={[styles.value, { color: colors.ink }]}>
+                    <Text style={[styles.label, { color: colors.inkSecondary }]}>Last Worn</Text>
+                    <Text style={[styles.value, { color: colors.inkPrimary }]}>
                         {lastWornAt
                             ? new Date(lastWornAt).toLocaleDateString()
-                            : "—"}
+                            : "---"}
                     </Text>
                 </>
             )}
 
-            <Text style={[styles.label, { color: colors.inkLight }]}>Storage Space</Text>
+            <Text style={[styles.sectionHeader, { color: colors.inkSecondary }]}>Location</Text>
+            <Text style={[styles.label, { color: colors.inkSecondary }]}>Storage Space</Text>
             {editing ? (
                 <Pressable
-                    style={[styles.dropdown, { backgroundColor: colors.white, borderColor: colors.border }]}
+                    style={[styles.dropdown, { backgroundColor: colors.surface, borderColor: colors.border }]}
                     onPress={() => setShowSpacePicker(true)}
                 >
-                    <Text style={[styles.dropdownText, { color: colors.ink }, !selectedSpace && { color: colors.inkLight }]}>
+                    <Text style={[styles.dropdownText, { color: colors.inkPrimary }, !selectedSpace && { color: colors.inkMuted }]}>
                         {selectedSpace?.name ?? "Unassigned"}
                     </Text>
-                    <Text style={[styles.dropdownArrow, { color: colors.inkLight }]}>▼</Text>
+                    <Text style={[styles.dropdownArrow, { color: colors.inkMuted }]}>v</Text>
                 </Pressable>
             ) : (
-                <Text style={[styles.value, { color: colors.ink }]}>{selectedSpace?.name ?? "Unassigned"}</Text>
+                <Text style={[styles.value, { color: colors.inkPrimary }]}>{selectedSpace?.name ?? "Unassigned"}</Text>
             )}
 
             {editing && (
-                <>
-                    <Pressable
-                        style={[styles.saveButton, saving && styles.disabled]}
-                        onPress={async () => {
-                            const result = await save();
-                            if (result) {
-                                setEditing(false);
-                                router.back();
-                            }
-                        }}
-                        disabled={saving}
-                    >
-                        <Text style={styles.saveLabel}>
-                            {saving ? "Saving..." : "Save Changes"}
-                        </Text>
-                    </Pressable>
+                <Pressable
+                    style={[styles.saveButton, { backgroundColor: colors.accent }, saving && styles.disabled]}
+                    onPress={async () => {
+                        const result = await save();
+                        if (result) {
+                            setEditing(false);
+                            router.back();
+                        }
+                    }}
+                    disabled={saving}
+                >
+                    <Text style={[styles.saveLabel, { color: colors.surface }]}>
+                        {saving ? "Saving..." : "Save Changes"}
+                    </Text>
+                </Pressable>
+            )}
 
-                    <Pressable
-                        style={styles.deleteButton}
-                        onPress={() => {
-                            Alert.alert("Delete", "Remove this article?", [
-                                { text: "Cancel" },
-                                {
-                                    text: "Delete",
-                                    style: "destructive",
-                                    onPress: async () => {
-                                        await remove();
-                                        router.back();
-                                    },
+            {editing && (
+                <Pressable
+                    style={[styles.deleteButton, { borderColor: colors.destructive }]}
+                    onPress={() => {
+                        Alert.alert("Delete", "Remove this article?", [
+                            { text: "Cancel" },
+                            {
+                                text: "Delete",
+                                style: "destructive",
+                                onPress: async () => {
+                                    await remove();
+                                    router.back();
                                 },
-                            ]);
-                        }}
-                    >
-                        <Text style={styles.deleteLabel}>Delete Article</Text>
-                    </Pressable>
-                </>
+                            },
+                        ]);
+                    }}
+                >
+                    <Text style={[styles.deleteLabel, { color: colors.destructive }]}>Delete Article</Text>
+                </Pressable>
             )}
 
             {showSpacePicker && (
-                <View style={styles.pickerOverlay}>
-                    <View style={styles.pickerContent}>
-                        <Text style={styles.pickerTitle}>Select Storage Space</Text>
+                <View style={[styles.pickerOverlay, { backgroundColor: colors.overlay }]}>
+                    <View style={[styles.pickerContent, { backgroundColor: colors.background }]}>
+                        <Text style={[styles.pickerTitle, { color: colors.inkPrimary }]}>Select Storage Space</Text>
                         <Pressable
-                            style={[styles.pickerItem, !form.storageSpaceId && styles.pickerItemSelected]}
+                            style={[styles.pickerItem, !form.storageSpaceId && { backgroundColor: colors.accent + "15" }]}
                             onPress={() => {
                                 updateField("storageSpaceId", null);
                                 setShowSpacePicker(false);
                             }}
                         >
-                            <Text style={[styles.pickerItemText, !form.storageSpaceId && styles.pickerItemTextSelected]}>
+                            <Text style={[styles.pickerItemText, { color: colors.inkPrimary }, !form.storageSpaceId && { color: colors.accent, fontWeight: "600" }]}>
                                 Unassigned
                             </Text>
                         </Pressable>
                         {spaces.map((space) => (
                             <Pressable
                                 key={space.id}
-                                style={[styles.pickerItem, form.storageSpaceId === space.id && styles.pickerItemSelected]}
+                                style={[styles.pickerItem, form.storageSpaceId === space.id && { backgroundColor: colors.accent + "15" }]}
                                 onPress={() => {
                                     updateField("storageSpaceId", space.id);
                                     setShowSpacePicker(false);
                                 }}
                             >
-                                <Text style={[styles.pickerItemText, form.storageSpaceId === space.id && styles.pickerItemTextSelected]}>
+                                <Text style={[styles.pickerItemText, { color: colors.inkPrimary }, form.storageSpaceId === space.id && { color: colors.accent, fontWeight: "600" }]}>
                                     {space.name}
                                     {space.subLocation ? ` — ${space.subLocation}` : ""}
                                 </Text>
@@ -274,7 +262,7 @@ export default function ArticleDetailScreen() {
                             style={styles.cancelButton}
                             onPress={() => setShowSpacePicker(false)}
                         >
-                            <Text style={styles.cancelLabel}>Cancel</Text>
+                            <Text style={[styles.cancelLabel, { color: colors.inkSecondary }]}>Cancel</Text>
                         </Pressable>
                     </View>
                 </View>
@@ -286,36 +274,37 @@ export default function ArticleDetailScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: lightColors.paper,
     },
     center: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: lightColors.paper,
     },
     content: {
         padding: spacing.lg,
         paddingBottom: 100,
     },
-    headerButton: {
+    headerButtonText: {
         ...typography.buttonSmall,
-        color: lightColors.accent,
+    },
+    sectionHeader: {
+        ...typography.caption,
+        textTransform: "uppercase",
+        letterSpacing: 0.5,
+        marginTop: spacing.xxl,
+        marginBottom: spacing.xs,
     },
     label: {
         ...typography.bodySmall,
-        color: lightColors.inkLight,
         fontWeight: "600",
         marginBottom: spacing.xs,
         marginTop: spacing.md,
     },
     value: {
         ...typography.body,
-        color: lightColors.ink,
     },
     emptyValue: {
         ...typography.body,
-        color: lightColors.border,
         fontStyle: "italic",
     },
     photoButtons: {
@@ -327,19 +316,12 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         padding: spacing.lg,
-        backgroundColor: lightColors.white,
         borderRadius: borderRadius.md,
         borderWidth: 2,
-        borderColor: lightColors.border,
         borderStyle: "dashed",
-    },
-    photoButtonIcon: {
-        fontSize: 32,
-        marginBottom: spacing.sm,
     },
     photoButtonLabel: {
         ...typography.bodySmall,
-        color: lightColors.ink,
         textAlign: "center",
     },
     imagePreview: {
@@ -349,7 +331,6 @@ const styles = StyleSheet.create({
         width: "100%",
         aspectRatio: 3 / 4,
         borderRadius: borderRadius.md,
-        backgroundColor: lightColors.paperDark,
     },
     changePhotoButton: {
         marginTop: spacing.sm,
@@ -358,7 +339,6 @@ const styles = StyleSheet.create({
     },
     changePhotoLabel: {
         ...typography.bodySmall,
-        color: lightColors.accent,
         fontWeight: "600",
     },
     tags: {
@@ -371,36 +351,26 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.md,
         paddingVertical: spacing.xs,
         borderRadius: borderRadius.round,
-        backgroundColor: lightColors.accent + "20",
     },
     tagLabel: {
         ...typography.caption,
-        color: lightColors.accent,
     },
     dropdown: {
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
         padding: spacing.sm,
-        backgroundColor: lightColors.white,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: lightColors.border,
     },
     dropdownText: {
         ...typography.body,
-        color: lightColors.ink,
-    },
-    dropdownPlaceholder: {
-        color: lightColors.inkLight,
     },
     dropdownArrow: {
         ...typography.caption,
-        color: lightColors.inkLight,
     },
     saveButton: {
         marginTop: spacing.xxl,
-        backgroundColor: lightColors.accent,
         paddingVertical: spacing.sm,
         borderRadius: 8,
         alignItems: "center",
@@ -410,16 +380,16 @@ const styles = StyleSheet.create({
     },
     saveLabel: {
         ...typography.button,
-        color: lightColors.white,
     },
     deleteButton: {
         marginTop: spacing.md,
         paddingVertical: spacing.sm,
         alignItems: "center",
+        borderWidth: 1,
+        borderRadius: 8,
     },
     deleteLabel: {
         ...typography.button,
-        color: lightColors.error,
     },
     pickerOverlay: {
         position: "absolute",
@@ -427,11 +397,9 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: "rgba(0,0,0,0.5)",
         justifyContent: "flex-end",
     },
     pickerContent: {
-        backgroundColor: lightColors.paper,
         borderTopLeftRadius: borderRadius.lg,
         borderTopRightRadius: borderRadius.lg,
         maxHeight: "70%",
@@ -439,7 +407,6 @@ const styles = StyleSheet.create({
     },
     pickerTitle: {
         ...typography.h3,
-        color: lightColors.ink,
         marginBottom: spacing.md,
     },
     pickerItem: {
@@ -447,16 +414,8 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         marginBottom: spacing.xs,
     },
-    pickerItemSelected: {
-        backgroundColor: lightColors.accent + "20",
-    },
     pickerItemText: {
         ...typography.body,
-        color: lightColors.ink,
-    },
-    pickerItemTextSelected: {
-        color: lightColors.accent,
-        fontWeight: "600",
     },
     cancelButton: {
         marginTop: spacing.md,
@@ -465,6 +424,5 @@ const styles = StyleSheet.create({
     },
     cancelLabel: {
         ...typography.button,
-        color: lightColors.inkLight,
     },
 });

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Pressable, Text, StyleSheet } from 'react-native';
-import { colors } from '@/theme/colors';
+import { useTheme } from '@/providers/ThemeContext';
 import { typography } from '@/theme/typography';
 import { spacing, borderRadius } from '@/theme/spacing';
 
@@ -9,16 +9,16 @@ interface WornTodayButtonProps {
 }
 
 export function WornTodayButton({ onPress }: WornTodayButtonProps) {
+  const { colors } = useTheme();
   return (
-    <Pressable style={styles.button} onPress={onPress}>
-      <Text style={styles.label}>Worn Today</Text>
+    <Pressable style={[styles.button, { backgroundColor: colors.success }]} onPress={onPress}>
+      <Text style={[styles.label, { color: colors.surface }]}>Worn Today</Text>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: colors.success,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.lg,
     borderRadius: borderRadius.round,
@@ -26,6 +26,5 @@ const styles = StyleSheet.create({
   },
   label: {
     ...typography.button,
-    color: colors.white,
   },
 });

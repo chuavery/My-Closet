@@ -1,7 +1,7 @@
 import React from 'react';
 import { ScrollView, Pressable, Text, StyleSheet } from 'react-native';
 import { Tag } from '@/models/Tag';
-import { colors } from '@/theme/colors';
+import { useTheme } from '@/providers/ThemeContext';
 import { typography } from '@/theme/typography';
 import { spacing, borderRadius } from '@/theme/spacing';
 
@@ -16,6 +16,7 @@ export function OccasionTagPicker({
   selectedTagIds,
   onToggle,
 }: OccasionTagPickerProps) {
+  const { colors } = useTheme();
   return (
     <ScrollView
       horizontal
@@ -27,10 +28,14 @@ export function OccasionTagPicker({
         return (
           <Pressable
             key={tag.id}
-            style={[styles.chip, isSelected && styles.chipSelected]}
+            style={[
+              styles.chip,
+              { borderColor: colors.accent, backgroundColor: 'transparent' },
+              isSelected && { backgroundColor: colors.accent + '15' },
+            ]}
             onPress={() => onToggle(tag.id)}
           >
-            <Text style={[styles.label, isSelected && styles.labelSelected]}>
+            <Text style={[styles.label, { color: colors.accent }, isSelected && { fontWeight: '600' }]}>
               {tag.name}
             </Text>
           </Pressable>
@@ -50,17 +55,8 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
     borderRadius: borderRadius.round,
     borderWidth: 1,
-    borderColor: colors.accent,
-    backgroundColor: colors.white,
-  },
-  chipSelected: {
-    backgroundColor: colors.accent,
   },
   label: {
     ...typography.buttonSmall,
-    color: colors.accent,
-  },
-  labelSelected: {
-    color: colors.white,
   },
 });

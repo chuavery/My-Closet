@@ -14,7 +14,7 @@ import { useArticleForm } from "@/viewmodels/useArticleForm";
 import { ArticleType, Color, Fit } from "@/models/Article";
 import { capitalize } from "@/lib/capitalize";
 import { Camera, Image as ImageIcon } from "lucide-react-native";
-import { colors } from "@/theme/colors";
+import { useTheme } from "@/providers/ThemeContext";
 import { typography } from "@/theme/typography";
 import { spacing, borderRadius } from "@/theme/spacing";
 
@@ -34,15 +34,15 @@ const FIT_OPTIONS: Fit[] = [
 
 export default function NewArticleScreen() {
     const router = useRouter();
+    const { colors } = useTheme();
     const { form, updateField, pickImage, takePhoto, save, saving } = useArticleForm();
 
     return (
         <ScrollView
-            style={styles.container}
+            style={[styles.container, { backgroundColor: colors.background }]}
             contentContainerStyle={styles.content}
         >
-            <Text style={styles.label}>Photo</Text>
-            <Text style={styles.hint}>A photo is required for every article.</Text>
+            <Text style={[styles.hint, { color: colors.inkSecondary }]}>A photo is required for every article.</Text>
             {form.originalImageUrl ? (
                 <View style={styles.imagePreview}>
                     <Image
@@ -50,116 +50,140 @@ export default function NewArticleScreen() {
                         style={styles.previewImage}
                     />
                     <Pressable style={styles.changePhotoButton} onPress={pickImage}>
-                        <Text style={styles.changePhotoLabel}>Change Photo</Text>
+                        <Text style={[styles.changePhotoLabel, { color: colors.accent }]}>Change Photo</Text>
                     </Pressable>
                 </View>
             ) : (
                 <View style={styles.photoButtons}>
-                    <Pressable style={styles.photoButton} onPress={takePhoto}>
-                        <Camera size={24} color={colors.ink} />
-                        <Text style={styles.photoButtonLabel}>Take Photo</Text>
+                    <Pressable style={[styles.photoButton, { borderColor: colors.border, backgroundColor: colors.surface }]} onPress={takePhoto}>
+                        <Camera size={24} color={colors.inkPrimary} />
+                        <Text style={[styles.photoButtonLabel, { color: colors.inkPrimary }]}>Take Photo</Text>
                     </Pressable>
-                    <Pressable style={styles.photoButton} onPress={pickImage}>
-                        <ImageIcon size={24} color={colors.ink} />
-                        <Text style={styles.photoButtonLabel}>Choose from Library</Text>
+                    <Pressable style={[styles.photoButton, { borderColor: colors.border, backgroundColor: colors.surface }]} onPress={pickImage}>
+                        <ImageIcon size={24} color={colors.inkPrimary} />
+                        <Text style={[styles.photoButtonLabel, { color: colors.inkPrimary }]}>Choose from Library</Text>
                     </Pressable>
                 </View>
             )}
 
-            <Text style={styles.label}>Name</Text>
+            <Text style={[styles.label, { color: colors.inkSecondary }]}>Name</Text>
             <TextInput
-                style={styles.input}
+                style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.inkPrimary }]}
                 value={form.name}
                 onChangeText={(v: string) => updateField("name", v)}
                 placeholder="Article name"
-                placeholderTextColor={colors.inkLight}
+                placeholderTextColor={colors.inkMuted}
             />
 
-            <Text style={styles.label}>Brand</Text>
+            <Text style={[styles.label, { color: colors.inkSecondary }]}>Brand</Text>
             <TextInput
-                style={styles.input}
+                style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.inkPrimary }]}
                 value={form.brand}
                 onChangeText={(v: string) => updateField("brand", v)}
                 placeholder="Brand"
-                placeholderTextColor={colors.inkLight}
+                placeholderTextColor={colors.inkMuted}
             />
 
-            <Text style={styles.label}>Type</Text>
+            <Text style={[styles.label, { color: colors.inkSecondary }]}>Type</Text>
             <View style={styles.chipRow}>
                 {ARTICLE_TYPES.map((t) => (
                     <Pressable
                         key={t}
-                        style={[styles.chip, form.articleType === t && styles.chipSelected]}
+                        style={[
+                            styles.chip,
+                            { borderColor: colors.border, backgroundColor: colors.surface },
+                            form.articleType === t && { backgroundColor: colors.accent, borderColor: colors.accent },
+                        ]}
                         onPress={() => updateField("articleType", t)}
                     >
-                        <Text style={[styles.chipLabel, form.articleType === t && styles.chipLabelSelected]}>
+                        <Text style={[
+                            styles.chipLabel,
+                            { color: colors.inkPrimary },
+                            form.articleType === t && { color: colors.surface },
+                        ]}>
                             {capitalize(t)}
                         </Text>
                     </Pressable>
                 ))}
             </View>
 
-            <Text style={styles.label}>Color</Text>
+            <Text style={[styles.label, { color: colors.inkSecondary }]}>Color</Text>
             <View style={styles.chipRow}>
                 {COLOR_OPTIONS.map((c) => (
                     <Pressable
                         key={c}
-                        style={[styles.chip, form.color === c && styles.chipSelected]}
+                        style={[
+                            styles.chip,
+                            { borderColor: colors.border, backgroundColor: colors.surface },
+                            form.color === c && { backgroundColor: colors.accent, borderColor: colors.accent },
+                        ]}
                         onPress={() => updateField("color", c)}
                     >
-                        <Text style={[styles.chipLabel, form.color === c && styles.chipLabelSelected]}>
+                        <Text style={[
+                            styles.chipLabel,
+                            { color: colors.inkPrimary },
+                            form.color === c && { color: colors.surface },
+                        ]}>
                             {capitalize(c)}
                         </Text>
                     </Pressable>
                 ))}
             </View>
 
-            <Text style={styles.label}>Fit</Text>
+            <Text style={[styles.label, { color: colors.inkSecondary }]}>Fit</Text>
             <View style={styles.chipRow}>
                 {FIT_OPTIONS.map((f) => (
                     <Pressable
                         key={f}
-                        style={[styles.chip, form.fit === f && styles.chipSelected]}
+                        style={[
+                            styles.chip,
+                            { borderColor: colors.border, backgroundColor: colors.surface },
+                            form.fit === f && { backgroundColor: colors.accent, borderColor: colors.accent },
+                        ]}
                         onPress={() => updateField("fit", f)}
                     >
-                        <Text style={[styles.chipLabel, form.fit === f && styles.chipLabelSelected]}>
+                        <Text style={[
+                            styles.chipLabel,
+                            { color: colors.inkPrimary },
+                            form.fit === f && { color: colors.surface },
+                        ]}>
                             {capitalize(f)}
                         </Text>
                     </Pressable>
                 ))}
             </View>
 
-            <Text style={styles.label}>Details</Text>
+            <Text style={[styles.label, { color: colors.inkSecondary }]}>Details</Text>
             <View style={styles.detailsRow}>
                 <View style={styles.detailField}>
                     <TextInput
-                        style={styles.input}
+                        style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.inkPrimary }]}
                         value={form.size}
                         onChangeText={(v: string) => updateField("size", v)}
                         placeholder="Size"
-                        placeholderTextColor={colors.inkLight}
+                        placeholderTextColor={colors.inkMuted}
                     />
                 </View>
                 <View style={styles.detailField}>
                     <TextInput
-                        style={styles.input}
+                        style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.inkPrimary }]}
                         value={form.fabricType}
                         onChangeText={(v: string) => updateField("fabricType", v)}
                         placeholder="Fabric"
-                        placeholderTextColor={colors.inkLight}
+                        placeholderTextColor={colors.inkMuted}
                     />
                 </View>
             </View>
 
             <Pressable
-                style={[styles.saveButton, saving && styles.disabled]}
+                style={[styles.saveButton, { backgroundColor: colors.accent }, saving && styles.disabled]}
                 onPress={async () => {
                     const result = await save();
                     if (result) router.back();
                 }}
                 disabled={saving}
             >
-                <Text style={styles.saveLabel}>
+                <Text style={[styles.saveLabel, { color: colors.surface }]}>
                     {saving ? "Adding..." : "Add Article"}
                 </Text>
             </Pressable>
@@ -170,7 +194,6 @@ export default function NewArticleScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.paper,
     },
     content: {
         padding: spacing.lg,
@@ -178,14 +201,12 @@ const styles = StyleSheet.create({
     },
     label: {
         ...typography.bodySmall,
-        color: colors.inkLight,
         fontWeight: "600",
         marginBottom: spacing.xs,
         marginTop: spacing.md,
     },
     hint: {
         ...typography.caption,
-        color: colors.inkLight,
         marginBottom: spacing.sm,
     },
     photoButtons: {
@@ -197,19 +218,12 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         padding: spacing.lg,
-        backgroundColor: colors.white,
         borderRadius: borderRadius.md,
         borderWidth: 2,
-        borderColor: colors.border,
         borderStyle: "dashed",
-    },
-    photoButtonIcon: {
-        fontSize: 32,
-        marginBottom: spacing.sm,
     },
     photoButtonLabel: {
         ...typography.bodySmall,
-        color: colors.ink,
         textAlign: "center",
     },
     imagePreview: {
@@ -219,7 +233,6 @@ const styles = StyleSheet.create({
         width: "100%",
         aspectRatio: 3 / 4,
         borderRadius: borderRadius.md,
-        backgroundColor: colors.paperDark,
     },
     changePhotoButton: {
         marginTop: spacing.sm,
@@ -228,17 +241,13 @@ const styles = StyleSheet.create({
     },
     changePhotoLabel: {
         ...typography.bodySmall,
-        color: colors.accent,
         fontWeight: "600",
     },
     input: {
         ...typography.body,
         padding: spacing.sm,
-        backgroundColor: colors.white,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: colors.border,
-        color: colors.ink,
     },
     chipRow: {
         flexDirection: "row",
@@ -250,20 +259,10 @@ const styles = StyleSheet.create({
         paddingVertical: spacing.xs,
         borderRadius: borderRadius.round,
         borderWidth: 1,
-        borderColor: colors.border,
-        backgroundColor: colors.white,
-    },
-    chipSelected: {
-        backgroundColor: colors.accent,
-        borderColor: colors.accent,
     },
     chipLabel: {
         ...typography.buttonSmall,
-        color: colors.ink,
         textTransform: "capitalize",
-    },
-    chipLabelSelected: {
-        color: colors.white,
     },
     detailsRow: {
         flexDirection: "row",
@@ -274,7 +273,6 @@ const styles = StyleSheet.create({
     },
     saveButton: {
         marginTop: spacing.xxl,
-        backgroundColor: colors.accent,
         paddingVertical: spacing.sm,
         borderRadius: 8,
         alignItems: "center",
@@ -284,6 +282,5 @@ const styles = StyleSheet.create({
     },
     saveLabel: {
         ...typography.button,
-        color: colors.white,
     },
 });

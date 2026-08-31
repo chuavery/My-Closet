@@ -9,12 +9,13 @@ import {
     Alert,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useOutfitBuilder } from "@/viewmodels/useOutfitBuilder";
 import { LayerType } from "@/models/OutfitArticle";
 import { LayerSlot } from "@/components/LayerSlot";
 import { ArticleListItem } from "@/components/ArticleListItem";
 import { FilterChipRow } from "@/components/FilterChipRow";
-import { colors } from "@/theme/colors";
+import { useTheme } from "@/providers/ThemeContext";
 import { typography } from "@/theme/typography";
 import { spacing, borderRadius } from "@/theme/spacing";
 import { ListFilter } from "lucide-react-native";
@@ -56,6 +57,8 @@ const FIT_OPTIONS: { label: string; value: string }[] = [
 export default function OutfitBuilderScreen() {
     const router = useRouter();
     const { id } = useLocalSearchParams<{ id: string }>();
+    const insets = useSafeAreaInsets();
+    const { colors } = useTheme();
     const {
         outfit,
         setOutfit,
@@ -126,39 +129,47 @@ export default function OutfitBuilderScreen() {
 
     return (
         <ScrollView
-            style={styles.container}
-            contentContainerStyle={styles.content}
+            style={[styles.container, { backgroundColor: colors.background }]}
+            contentContainerStyle={{ paddingTop: insets.top + spacing.lg, paddingBottom: 100, paddingHorizontal: spacing.lg }}
         >
-            <Text style={styles.label}>Outfit Name</Text>
+            <Text style={[styles.label, { color: colors.inkSecondary }]}>Outfit Name</Text>
             <TextInput
-                style={styles.input}
+                style={[styles.input, {
+                    backgroundColor: colors.surface,
+                    borderColor: colors.border,
+                    color: colors.inkPrimary,
+                }]}
                 value={outfit?.name ?? ""}
                 onChangeText={(v: any) =>
                     setOutfit((prev) => (prev ? { ...prev, name: v } : prev))
                 }
                 placeholder="Name this outfit"
-                placeholderTextColor={colors.inkLight}
+                placeholderTextColor={colors.inkMuted}
             />
 
-            <Text style={styles.sectionTitle}>Occasion Tags</Text>
+            <Text style={[styles.sectionTitle, { color: colors.inkPrimary }]}>Occasion Tags</Text>
             <View style={styles.tagSection}>
                 <View style={styles.tagSearchRow}>
                     <TextInput
-                        style={styles.tagSearchInput}
+                        style={[styles.tagSearchInput, {
+                            backgroundColor: colors.surface,
+                            borderColor: colors.border,
+                            color: colors.inkPrimary,
+                        }]}
                         placeholder="Search or add tags..."
-                        placeholderTextColor={colors.inkLight}
+                        placeholderTextColor={colors.inkMuted}
                         value={tagSearch}
                         onChangeText={setTagSearch}
                         onFocus={() => setShowTagPicker(true)}
                     />
                     {tagSearch.trim() && !exactTagMatch && (
-                        <Pressable style={styles.addTagButton} onPress={handleCreateTag}>
-                            <Text style={styles.addTagLabel}>+ Add</Text>
+                        <Pressable style={[styles.addTagButton, { backgroundColor: colors.accent }]} onPress={handleCreateTag}>
+                            <Text style={[styles.addTagLabel, { color: colors.surface }]}>+ Add</Text>
                         </Pressable>
                     )}
                 </View>
                 {showTagPicker && (
-                    <View style={styles.tagDropdown}>
+                    <View style={[styles.tagDropdown, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                         <ScrollView style={styles.tagDropdownScroll} nestedScrollEnabled>
                             {filteredTags.length > 0 ? (
                                 filteredTags.map((tag) => {
@@ -166,7 +177,7 @@ export default function OutfitBuilderScreen() {
                                     return (
                                         <Pressable
                                             key={tag.id}
-                                            style={[styles.tagItem, isSelected && styles.tagItemSelected]}
+                                            style={[styles.tagItem, { borderBottomColor: colors.border }, isSelected && { backgroundColor: colors.accent + "10" }]}
                                             onPress={() => {
                                                 setSelectedTagIds((prev) =>
                                                     isSelected
@@ -175,19 +186,19 @@ export default function OutfitBuilderScreen() {
                                                 );
                                             }}
                                         >
-                                            <Text style={[styles.tagItemText, isSelected && styles.tagItemTextSelected]}>
+                                            <Text style={[styles.tagItemText, { color: colors.inkPrimary }, isSelected && { color: colors.accent }]}>
                                                 {tag.name}
                                             </Text>
-                                            {isSelected && <Text style={styles.tagCheck}>✓</Text>}
+                                            {isSelected && <Text style={[styles.tagCheck, { color: colors.accent }]}>✓</Text>}
                                         </Pressable>
                                     );
                                 })
                             ) : (
-                                <Text style={styles.tagEmpty}>No tags found</Text>
+                                <Text style={[styles.tagEmpty, { color: colors.inkMuted }]}>No tags found</Text>
                             )}
                         </ScrollView>
-                        <Pressable style={styles.tagDoneButton} onPress={() => setShowTagPicker(false)}>
-                            <Text style={styles.tagDoneLabel}>Done</Text>
+                        <Pressable style={[styles.tagDoneButton, { borderTopColor: colors.border }]} onPress={() => setShowTagPicker(false)}>
+                            <Text style={[styles.tagDoneLabel, { color: colors.accent }]}>Done</Text>
                         </Pressable>
                     </View>
                 )}
@@ -197,12 +208,12 @@ export default function OutfitBuilderScreen() {
                             const tag = allTags.find((t) => t.id === tagId);
                             if (!tag) return null;
                             return (
-                                <View key={tagId} style={styles.selectedTag}>
-                                    <Text style={styles.selectedTagText}>{tag.name}</Text>
+                                <View key={tagId} style={[styles.selectedTag, { backgroundColor: colors.accent + "15" }]}>
+                                    <Text style={[styles.selectedTagText, { color: colors.accent }]}>{tag.name}</Text>
                                     <Pressable
                                         onPress={() => setSelectedTagIds((prev) => prev.filter((id) => id !== tagId))}
                                     >
-                                        <Text style={styles.selectedTagRemove}>×</Text>
+                                        <Text style={[styles.selectedTagRemove, { color: colors.accent }]}>×</Text>
                                     </Pressable>
                                 </View>
                             );
@@ -211,7 +222,7 @@ export default function OutfitBuilderScreen() {
                 )}
             </View>
 
-            <Text style={styles.sectionTitle}>Layers</Text>
+            <Text style={[styles.sectionTitle, { color: colors.inkPrimary }]}>Layers</Text>
             {LAYER_TYPES.map((lt) => {
                 const oa = outfitArticles.find((o) => o.layerType === lt);
                 return (
@@ -236,29 +247,34 @@ export default function OutfitBuilderScreen() {
             })}
 
             {showArticlePicker && (
-                <View style={styles.pickerOverlay}>
-                    <View style={styles.pickerContent}>
+                <View style={[styles.pickerOverlay, { backgroundColor: colors.overlay }]}>
+                    <View style={[styles.pickerContent, { backgroundColor: colors.background }]}>
                         <View style={styles.pickerHeader}>
-                            <Text style={styles.pickerTitle}>
+                            <Text style={[styles.pickerTitle, { color: colors.inkPrimary }]}>
                                 Select article for {activeLayer}
                             </Text>
                             <Pressable onPress={() => setShowArticlePicker(false)}>
-                                <Text style={styles.cancelLabel}>Cancel</Text>
+                                <Text style={[styles.cancelLabel, { color: colors.accent }]}>Cancel</Text>
                             </Pressable>
                         </View>
 
                         <View style={styles.pickerSearchRow}>
                             <TextInput
-                                style={styles.pickerSearchInput}
+                                style={[styles.pickerSearchInput, {
+                                    backgroundColor: colors.surface,
+                                    borderColor: colors.border,
+                                    color: colors.inkPrimary,
+                                }]}
                                 placeholder="Search by name or brand..."
-                                placeholderTextColor={colors.inkLight}
+                                placeholderTextColor={colors.inkMuted}
                                 value={pickerSearch}
                                 onChangeText={setPickerSearch}
                             />
                             <Pressable
                                 style={[
                                     styles.pickerFilterButton,
-                                    (filtersExpanded || hasActiveFilters) && styles.pickerFilterButtonActive,
+                                    { borderColor: colors.border, backgroundColor: colors.surface },
+                                    (filtersExpanded || hasActiveFilters) && { backgroundColor: colors.accent, borderColor: colors.accent },
                                 ]}
                                 onPress={() => setFiltersExpanded(!filtersExpanded)}
                             >
@@ -266,11 +282,11 @@ export default function OutfitBuilderScreen() {
                                     size={16}
                                     color={
                                         (filtersExpanded || hasActiveFilters)
-                                            ? colors.white
-                                            : colors.ink
+                                            ? colors.surface
+                                            : colors.inkPrimary
                                     }
                                 />
-                                {hasActiveFilters && <View style={styles.pickerFilterDot} />}
+                                {hasActiveFilters && <View style={[styles.pickerFilterDot, { backgroundColor: colors.surface }]} />}
                             </Pressable>
                         </View>
                         {filtersExpanded && (
@@ -310,7 +326,7 @@ export default function OutfitBuilderScreen() {
                                         />
                                     ))
                                 ) : (
-                                    <Text style={styles.pickerEmpty}>
+                                    <Text style={[styles.pickerEmpty, { color: colors.inkMuted }]}>
                                         No articles match your search
                                     </Text>
                                 )}
@@ -321,21 +337,21 @@ export default function OutfitBuilderScreen() {
             )}
 
             <Pressable
-                style={[styles.saveButton, saving && styles.disabled]}
+                style={[styles.saveButton, { backgroundColor: colors.accent }, saving && styles.disabled]}
                 onPress={async () => {
                     const result = await save();
                     if (result) router.back();
                 }}
                 disabled={saving}
             >
-                <Text style={styles.saveLabel}>
+                <Text style={[styles.saveLabel, { color: colors.surface }]}>
                     {saving ? "Saving..." : id ? "Update Outfit" : "Save Outfit"}
                 </Text>
             </Pressable>
 
             {id && (
                 <Pressable
-                    style={styles.deleteButton}
+                    style={[styles.deleteButton, { borderColor: colors.destructive }]}
                     onPress={() => {
                         Alert.alert("Delete", "Remove this outfit?", [
                             { text: "Cancel" },
@@ -350,7 +366,7 @@ export default function OutfitBuilderScreen() {
                         ]);
                     }}
                 >
-                    <Text style={styles.deleteLabel}>Delete Outfit</Text>
+                    <Text style={[styles.deleteLabel, { color: colors.destructive }]}>Delete Outfit</Text>
                 </Pressable>
             )}
         </ScrollView>
@@ -360,30 +376,20 @@ export default function OutfitBuilderScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.paper,
-    },
-    content: {
-        padding: spacing.lg,
-        paddingBottom: 100,
     },
     label: {
         ...typography.bodySmall,
-        color: colors.inkLight,
         fontWeight: "600",
         marginBottom: spacing.xs,
     },
     input: {
         ...typography.body,
         padding: spacing.sm,
-        backgroundColor: colors.white,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: colors.border,
-        color: colors.ink,
     },
     sectionTitle: {
         ...typography.h3,
-        color: colors.ink,
         marginTop: spacing.xxl,
         marginBottom: spacing.md,
     },
@@ -399,28 +405,21 @@ const styles = StyleSheet.create({
         ...typography.body,
         flex: 1,
         padding: spacing.sm,
-        backgroundColor: colors.white,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: colors.border,
-        color: colors.ink,
     },
     addTagButton: {
         paddingVertical: spacing.sm,
         paddingHorizontal: spacing.md,
-        backgroundColor: colors.accent,
         borderRadius: 8,
     },
     addTagLabel: {
         ...typography.buttonSmall,
-        color: colors.white,
     },
     tagDropdown: {
         marginTop: spacing.sm,
-        backgroundColor: colors.white,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: colors.border,
         maxHeight: 200,
     },
     tagDropdownScroll: {
@@ -432,26 +431,15 @@ const styles = StyleSheet.create({
         alignItems: "center",
         padding: spacing.sm,
         borderBottomWidth: 1,
-        borderBottomColor: colors.border,
-    },
-    tagItemSelected: {
-        backgroundColor: colors.accent + "10",
     },
     tagItemText: {
         ...typography.body,
-        color: colors.ink,
-    },
-    tagItemTextSelected: {
-        color: colors.accent,
-        fontWeight: "600",
     },
     tagCheck: {
         ...typography.body,
-        color: colors.accent,
     },
     tagEmpty: {
         ...typography.body,
-        color: colors.inkLight,
         textAlign: "center",
         padding: spacing.lg,
     },
@@ -459,11 +447,9 @@ const styles = StyleSheet.create({
         padding: spacing.sm,
         alignItems: "center",
         borderTopWidth: 1,
-        borderTopColor: colors.border,
     },
     tagDoneLabel: {
         ...typography.buttonSmall,
-        color: colors.accent,
     },
     selectedTags: {
         flexDirection: "row",
@@ -477,15 +463,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.sm,
         paddingVertical: spacing.xs,
         borderRadius: borderRadius.round,
-        backgroundColor: colors.accent + "20",
     },
     selectedTagText: {
         ...typography.caption,
-        color: colors.accent,
     },
     selectedTagRemove: {
         ...typography.caption,
-        color: colors.accent,
         marginLeft: spacing.xs,
     },
     pickerOverlay: {
@@ -494,12 +477,10 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: "rgba(0,0,0,0.5)",
         justifyContent: "flex-end",
         zIndex: 100,
     },
     pickerContent: {
-        backgroundColor: colors.paper,
         borderTopLeftRadius: borderRadius.lg,
         borderTopRightRadius: borderRadius.lg,
         height: "85%",
@@ -513,12 +494,11 @@ const styles = StyleSheet.create({
     },
     pickerTitle: {
         ...typography.h3,
-        color: colors.ink,
         textTransform: "capitalize",
     },
     cancelLabel: {
         ...typography.buttonSmall,
-        color: colors.accent,
+        color: '#B9705F',
     },
     pickerList: {
         flex: 1,
@@ -539,38 +519,21 @@ const styles = StyleSheet.create({
         ...typography.body,
         flex: 1,
         padding: spacing.sm,
-        backgroundColor: colors.white,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: colors.border,
-        color: colors.ink,
     },
     pickerFilterButton: {
         paddingVertical: spacing.sm,
         paddingHorizontal: spacing.md,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: colors.border,
-        backgroundColor: colors.white,
         flexDirection: "row",
         alignItems: "center",
-    },
-    pickerFilterButtonActive: {
-        backgroundColor: colors.accent,
-        borderColor: colors.accent,
-    },
-    pickerFilterLabel: {
-        ...typography.buttonSmall,
-        color: colors.ink,
-    },
-    pickerFilterLabelActive: {
-        color: colors.white,
     },
     pickerFilterDot: {
         width: 6,
         height: 6,
         borderRadius: 3,
-        backgroundColor: colors.white,
         marginLeft: spacing.xs,
     },
     pickerFilterSection: {
@@ -579,13 +542,11 @@ const styles = StyleSheet.create({
     },
     pickerEmpty: {
         ...typography.body,
-        color: colors.inkLight,
         textAlign: "center",
         marginTop: spacing.xxl,
     },
     saveButton: {
         marginTop: spacing.xxl,
-        backgroundColor: colors.accent,
         paddingVertical: spacing.sm,
         borderRadius: 8,
         alignItems: "center",
@@ -595,18 +556,15 @@ const styles = StyleSheet.create({
     },
     saveLabel: {
         ...typography.button,
-        color: colors.white,
     },
     deleteButton: {
         marginTop: spacing.md,
         paddingVertical: spacing.sm,
         alignItems: "center",
         borderWidth: 1,
-        borderColor: colors.error,
         borderRadius: 8,
     },
     deleteLabel: {
         ...typography.button,
-        color: colors.error,
     },
 });

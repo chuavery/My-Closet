@@ -9,13 +9,14 @@ import {
 import { useRouter } from "expo-router";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useStorageSpaces } from "@/viewmodels/useStorageSpaces";
-import { colors } from "@/theme/colors";
+import { useTheme } from "@/providers/ThemeContext";
 import { typography } from "@/theme/typography";
 import { spacing, borderRadius } from "@/theme/spacing";
 import { ChevronLeft } from "lucide-react-native";
 
 export default function QRScanScreen() {
     const router = useRouter();
+    const { colors } = useTheme();
     const { findByQrCode } = useStorageSpaces();
     const [permission, requestPermission] = useCameraPermissions();
     const [scanning, setScanning] = useState(true);
@@ -47,7 +48,10 @@ export default function QRScanScreen() {
                             setScanning(true);
                         },
                     },
-                    { text: "OK", onPress: () => router.back() },
+                    {
+                        text: "Go Back",
+                        onPress: () => router.back(),
+                    },
                 ]
             );
         }
@@ -55,20 +59,20 @@ export default function QRScanScreen() {
 
     if (!permission) {
         return (
-            <View style={styles.center}>
-                <Text style={styles.empty}>Requesting camera permission...</Text>
+            <View style={[styles.center, { backgroundColor: colors.background }]}>
+                <Text style={[styles.instruction, { color: colors.inkPrimary }]}>Requesting camera permission...</Text>
             </View>
         );
     }
 
     if (!permission.granted) {
         return (
-            <View style={styles.center}>
-                <Text style={styles.empty}>
+            <View style={[styles.center, { backgroundColor: colors.background }]}>
+                <Text style={[styles.instruction, { color: colors.inkPrimary }]}>
                     Camera permission is required to scan QR codes.
                 </Text>
-                <Pressable style={styles.permissionButton} onPress={requestPermission}>
-                    <Text style={styles.permissionLabel}>Grant Permission</Text>
+                <Pressable style={[styles.permissionButton, { backgroundColor: colors.accent }]} onPress={requestPermission}>
+                    <Text style={[styles.permissionLabel, { color: colors.surface }]}>Grant Permission</Text>
                 </Pressable>
             </View>
         );
@@ -83,7 +87,7 @@ export default function QRScanScreen() {
             >
                 <View style={styles.overlay}>
                     <Pressable style={styles.backButton} onPress={() => router.back()}>
-                        <ChevronLeft size={24} color={colors.white} />
+                        <ChevronLeft size={24} color={colors.surface} />
                     </Pressable>
                     <View style={styles.scanFrame}>
                         <View style={[styles.corner, styles.topLeft]} />
@@ -91,7 +95,7 @@ export default function QRScanScreen() {
                         <View style={[styles.corner, styles.bottomLeft]} />
                         <View style={[styles.corner, styles.bottomRight]} />
                     </View>
-                    <Text style={styles.instruction}>
+                    <Text style={[styles.instruction, { color: colors.surface, textShadowColor: colors.overlay }]}>
                         Point camera at a storage space QR code
                     </Text>
                 </View>
@@ -107,13 +111,11 @@ const FRAME_SIZE = 250;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#000",
     },
     center: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: colors.paper,
         padding: spacing.lg,
     },
     camera: {
@@ -137,7 +139,7 @@ const styles = StyleSheet.create({
         position: "absolute",
         width: CORNER_SIZE,
         height: CORNER_SIZE,
-        borderColor: colors.white,
+        borderColor: "#FFFFFF",
     },
     topLeft: {
         top: 0,
@@ -165,27 +167,18 @@ const styles = StyleSheet.create({
     },
     instruction: {
         ...typography.body,
-        color: colors.white,
         textAlign: "center",
-        marginTop: spacing.xl,
-        textShadowColor: "rgba(0,0,0,0.6)",
+        marginTop: spacing.xxl,
         textShadowOffset: { width: 0, height: 1 },
         textShadowRadius: 4,
     },
-    empty: {
-        ...typography.body,
-        color: colors.inkLight,
-        textAlign: "center",
-        marginBottom: spacing.lg,
-    },
     permissionButton: {
-        backgroundColor: colors.accent,
-        paddingVertical: spacing.md,
+        marginTop: spacing.lg,
+        paddingVertical: spacing.sm,
         paddingHorizontal: spacing.xl,
-        borderRadius: 8,
+        borderRadius: borderRadius.round,
     },
     permissionLabel: {
         ...typography.button,
-        color: colors.white,
     },
 });

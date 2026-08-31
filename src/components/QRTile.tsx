@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
-import { colors } from '@/theme/colors';
+import { useTheme } from '@/providers/ThemeContext';
 import { typography } from '@/theme/typography';
 import { spacing, borderRadius } from '@/theme/spacing';
 
@@ -11,18 +11,19 @@ interface QRTileProps {
 }
 
 export function QRTile({ value, label }: QRTileProps) {
+  const { colors } = useTheme();
   return (
-    <View style={styles.container}>
-      <View style={styles.qrWrapper}>
+    <View style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+      <View style={[styles.qrWrapper, { backgroundColor: colors.surface }]}>
         <QRCode
           value={value}
           size={160}
-          color={colors.ink}
-          backgroundColor={colors.white}
+          color={colors.inkPrimary}
+          backgroundColor={colors.surface}
         />
       </View>
-      {label && <Text style={styles.label}>{label}</Text>}
-      <Text style={styles.value} numberOfLines={1}>
+      {label && <Text style={[styles.label, { color: colors.inkPrimary }]}>{label}</Text>}
+      <Text style={[styles.value, { color: colors.inkSecondary }]} numberOfLines={1}>
         {value}
       </Text>
     </View>
@@ -33,25 +34,20 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     padding: spacing.md,
-    backgroundColor: colors.white,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.border,
   },
   qrWrapper: {
     padding: spacing.md,
-    backgroundColor: colors.white,
     borderRadius: borderRadius.sm,
     marginBottom: spacing.sm,
   },
   label: {
     ...typography.bodySmall,
-    color: colors.ink,
     fontWeight: '600',
     marginBottom: 2,
   },
   value: {
     ...typography.caption,
-    color: colors.inkLight,
   },
 });

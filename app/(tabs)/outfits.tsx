@@ -10,13 +10,14 @@ import {
 import { useRouter } from "expo-router";
 import { Outfit } from "@/models/Outfit";
 import { useRepositories } from "@/providers/RepositoryProvider";
-import { colors } from "@/theme/colors";
+import { useTheme } from "@/providers/ThemeContext";
 import { typography } from "@/theme/typography";
 import { spacing, borderRadius } from "@/theme/spacing";
-import { Plus } from "lucide-react-native";
+import { Plus, Layers } from "lucide-react-native";
 
 export default function OutfitsScreen() {
     const router = useRouter();
+    const { colors } = useTheme();
     const { outfitRepository } = useRepositories();
     const [outfits, setOutfits] = useState<Outfit[]>([]);
     const [loading, setLoading] = useState(true);
@@ -30,14 +31,14 @@ export default function OutfitsScreen() {
 
     if (loading) {
         return (
-            <View style={styles.center}>
+            <View style={[styles.center, { backgroundColor: colors.background }]}>
                 <ActivityIndicator size="large" color={colors.accent} />
             </View>
         );
     }
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: colors.background }]}>
             <FlatList<Outfit>
                 data={outfits}
                 keyExtractor={(item) => item.id}
@@ -45,12 +46,12 @@ export default function OutfitsScreen() {
                 contentContainerStyle={styles.list}
                 renderItem={({ item }) => (
                     <Pressable
-                        style={styles.card}
+                        style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
                         onPress={() => router.push(`/outfit/${item.id}`)}
                     >
                         <View style={styles.cardContent}>
-                            <Text style={styles.name}>{item.name}</Text>
-                            <Text style={styles.meta}>
+                            <Text style={[styles.name, { color: colors.inkPrimary }]}>{item.name}</Text>
+                            <Text style={[styles.meta, { color: colors.inkSecondary }]}>
                                 {item.wearCount} worn
                                 {item.lastWornAt
                                     ? ` · Last: ${new Date(
@@ -62,14 +63,23 @@ export default function OutfitsScreen() {
                     </Pressable>
                 )}
                 ListEmptyComponent={
-                    <Text style={styles.empty}>No outfits yet</Text>
+                    <View style={styles.emptyContainer}>
+                        <Layers size={48} color={colors.inkMuted} />
+                        <Text style={[styles.emptyTitle, { color: colors.inkPrimary }]}>No outfits yet</Text>
+                        <Text style={[styles.emptySubtitle, { color: colors.inkSecondary }]}>
+                            Tap + to create your first outfit
+                        </Text>
+                    </View>
                 }
             />
             <Pressable
-                style={styles.fab}
+                style={[styles.fab, {
+                    backgroundColor: colors.accent,
+                    shadowColor: colors.inkPrimary,
+                }]}
                 onPress={() => router.push("/outfit/builder")}
             >
-                <Plus size={24} color={colors.white} />
+                <Plus size={24} color={colors.surface} />
             </Pressable>
         </View>
     );
@@ -78,44 +88,45 @@ export default function OutfitsScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.paper,
     },
     center: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: colors.paper,
     },
     listContainer: {
         flex: 1,
     },
     list: {
         padding: spacing.lg,
-        paddingBottom: 100,
+        paddingBottom: 130,
     },
     card: {
-        backgroundColor: colors.white,
         borderRadius: borderRadius.md,
         borderWidth: 1,
-        borderColor: colors.border,
         padding: spacing.lg,
         marginBottom: spacing.md,
     },
     cardContent: {},
     name: {
         ...typography.h3,
-        color: colors.ink,
     },
     meta: {
         ...typography.bodySmall,
-        color: colors.inkLight,
         marginTop: spacing.xs,
     },
-    empty: {
-        ...typography.body,
-        color: colors.inkLight,
+    emptyContainer: {
+        alignItems: "center",
+        marginTop: spacing.xxxxl,
+        gap: spacing.sm,
+    },
+    emptyTitle: {
+        ...typography.h3,
         textAlign: "center",
-        marginTop: spacing.xxxl,
+    },
+    emptySubtitle: {
+        ...typography.body,
+        textAlign: "center",
     },
     fab: {
         position: "absolute",
@@ -124,11 +135,9 @@ const styles = StyleSheet.create({
         width: 56,
         height: 56,
         borderRadius: 28,
-        backgroundColor: colors.accent,
         justifyContent: "center",
         alignItems: "center",
         elevation: 4,
-        shadowColor: colors.ink,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
         shadowRadius: 4,

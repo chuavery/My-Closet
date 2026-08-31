@@ -1,33 +1,24 @@
-import React from 'react';
-import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
+import React, { useRef } from 'react';
+import { View, Text, StyleSheet, Pressable, Image, Animated } from 'react-native';
+import { Swipeable } from 'react-native-gesture-handler';
 import { Article } from '@/models/Article';
 import { capitalize } from '@/lib/capitalize';
-import { colors } from '@/theme/colors';
+import { useTheme } from '@/providers/ThemeContext';
+import { ARTICLE_COLORS } from '@/theme/colors';
 import { typography } from '@/theme/typography';
 import { spacing, borderRadius } from '@/theme/spacing';
+import { Trash2 } from 'lucide-react-native';
 
 interface ArticleListItemProps {
   article: Article;
   onPress?: () => void;
+  onDelete?: () => void;
 }
 
-const COLOR_MAP: Record<string, string> = {
-  red: '#C45B3E',
-  orange: '#E88A4A',
-  yellow: '#E8C84A',
-  green: '#5A8F6A',
-  blue: '#4A7AE8',
-  indigo: '#5A4AE8',
-  violet: '#8A4AE8',
-  pink: '#E87AB0',
-  white: '#F0EDE6',
-  brown: '#8B6F47',
-  black: '#2C2C2C',
-};
-
-export function ArticleListItem({ article, onPress }: ArticleListItemProps) {
+function ListItemInner({ article, onPress }: { article: Article; onPress?: () => void }) {
+  const { colors } = useTheme();
   return (
-    <Pressable style={styles.row} onPress={onPress}>
+    <Pressable style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.border }]} onPress={onPress}>
       <View style={styles.imageContainer}>
         {article.originalImageUrl ? (
           <Image
@@ -38,21 +29,21 @@ export function ArticleListItem({ article, onPress }: ArticleListItemProps) {
           <View
             style={[
               styles.imagePlaceholder,
-              { backgroundColor: COLOR_MAP[article.color] ?? colors.paperDark },
+              { backgroundColor: ARTICLE_COLORS[article.color] ?? colors.paperDark },
             ]}
           >
-            <Text style={styles.placeholderText}>
+            <Text style={[styles.placeholderText, { color: colors.surface }]}>
               {article.name?.charAt(0) ?? article.articleType.charAt(0).toUpperCase()}
             </Text>
           </View>
         )}
       </View>
       <View style={styles.info}>
-        <Text style={styles.name} numberOfLines={1}>
+        <Text style={[styles.name, { color: colors.inkPrimary }]} numberOfLines={2}>
           {article.name ?? capitalize(article.articleType)}
         </Text>
         {article.brand ? (
-          <Text style={styles.brand} numberOfLines={1}>
+          <Text style={[styles.brand, { color: colors.inkSecondary }]} numberOfLines={1}>
             {article.brand}
           </Text>
         ) : null}
@@ -61,14 +52,48 @@ export function ArticleListItem({ article, onPress }: ArticleListItemProps) {
   );
 }
 
+export function ArticleListItem({ article, onPress, onDelete }: ArticleListItemProps) {
+  const { colors } = useTheme();
+  const swipeableRef = useRef<Swipeable>(null);
+
+  if (!onDelete) {
+    return <ListItemInner article={article} onPress={onPress} />;
+  }
+
+  const renderRightActions = (progress: Animated.AnimatedInterpolation<number>) => {
+    const translateX = progress.interpolate({
+      inputRange: [0, 1],
+      outputRange: [80, 0],
+    });
+
+    return (
+      <Animated.View style={[styles.deleteAction, { transform: [{ translateX }] }]}>
+        <Pressable
+          style={[styles.deleteButton, { backgroundColor: colors.destructive }]}
+          onPress={() => {
+            swipeableRef.current?.close();
+            onDelete();
+          }}
+        >
+          <Trash2 size={20} color={colors.surface} />
+        </Pressable>
+      </Animated.View>
+    );
+  };
+
+  return (
+    <Swipeable ref={swipeableRef} renderRightActions={renderRightActions} overshootRight={false}>
+      <ListItemInner article={article} onPress={onPress} />
+    </Swipeable>
+  );
+}
+
 const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.white,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.border,
     padding: spacing.sm,
     marginBottom: spacing.sm,
   },
@@ -90,7 +115,6 @@ const styles = StyleSheet.create({
   },
   placeholderText: {
     ...typography.h3,
-    color: colors.white,
     opacity: 0.8,
   },
   info: {
@@ -99,12 +123,23 @@ const styles = StyleSheet.create({
   },
   name: {
     ...typography.body,
-    color: colors.ink,
     fontWeight: '600',
   },
   brand: {
     ...typography.bodySmall,
-    color: colors.inkLight,
     marginTop: 2,
+  },
+  deleteAction: {
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+    marginBottom: spacing.sm,
+    marginLeft: spacing.sm,
+  },
+  deleteButton: {
+    width: 56,
+    height: '100%',
+    borderRadius: borderRadius.md,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

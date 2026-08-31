@@ -12,13 +12,14 @@ import { useRouter } from "expo-router";
 import { useStorageSpaces } from "@/viewmodels/useStorageSpaces";
 import { StorageSpace } from "@/models/StorageSpace";
 import { StorageSpaceRow } from "@/components/StorageSpaceRow";
-import { colors } from "@/theme/colors";
+import { useTheme } from "@/providers/ThemeContext";
 import { typography } from "@/theme/typography";
 import { spacing } from "@/theme/spacing";
-import { Plus, Scan } from "lucide-react-native";
+import { Plus, Scan, ArchiveX } from "lucide-react-native";
 
 export default function StorageScreen() {
     const router = useRouter();
+    const { colors } = useTheme();
     const {
         spaces,
         articlesBySpace,
@@ -29,17 +30,20 @@ export default function StorageScreen() {
 
     if (loading) {
         return (
-            <View style={styles.center}>
+            <View style={[styles.center, { backgroundColor: colors.background }]}>
                 <ActivityIndicator size="large" color={colors.accent} />
             </View>
         );
     }
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: colors.background }]}>
             {unassignedArticles.length > 0 && (
-                <View style={styles.notice}>
-                    <Text style={styles.noticeText}>
+                <View style={[styles.notice, {
+                    backgroundColor: colors.accent + "20",
+                    borderLeftColor: colors.accent,
+                }]}>
+                    <Text style={[styles.noticeText, { color: colors.accent }]}>
                         {unassignedArticles.length} unassigned article
                         {unassignedArticles.length > 1 ? "s" : ""}
                     </Text>
@@ -55,24 +59,50 @@ export default function StorageScreen() {
                         space={item}
                         articleCount={(articlesBySpace[item.id] ?? []).length}
                         onPress={() => router.push(`/storage/${item.id}`)}
+                        onDelete={() => {
+                            Alert.alert(
+                                "Delete Space",
+                                `Delete "${item.name}"? Articles in this space will be unassigned.`,
+                                [
+                                    { text: "Cancel", style: "cancel" },
+                                    {
+                                        text: "Delete",
+                                        style: "destructive",
+                                        onPress: () => deleteSpace(item.id),
+                                    },
+                                ]
+                            );
+                        }}
                     />
                 )}
                 ListEmptyComponent={
-                    <Text style={styles.empty}>No storage spaces yet</Text>
+                    <View style={styles.emptyContainer}>
+                        <ArchiveX size={48} color={colors.inkMuted} />
+                        <Text style={[styles.emptyTitle, { color: colors.inkPrimary }]}>No storage spaces yet</Text>
+                        <Text style={[styles.emptySubtitle, { color: colors.inkSecondary }]}>
+                            Tap + to create your first space
+                        </Text>
+                    </View>
                 }
             />
             <View style={styles.fabRow}>
                 <Pressable
-                    style={styles.scanFab}
+                    style={[styles.scanFab, {
+                        backgroundColor: colors.surface,
+                        borderColor: colors.border,
+                    }]}
                     onPress={() => router.push("/storage/scan")}
                 >
                     <Scan size={24} color={colors.accent} />
                 </Pressable>
                 <Pressable
-                    style={styles.fab}
+                    style={[styles.fab, {
+                        backgroundColor: colors.accent,
+                        shadowColor: colors.inkPrimary,
+                    }]}
                     onPress={() => router.push("/storage/new")}
                 >
-                    <Plus size={24} color={colors.white} />
+                    <Plus size={24} color={colors.surface} />
                 </Pressable>
             </View>
         </View>
@@ -82,38 +112,40 @@ export default function StorageScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.paper,
     },
     center: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: colors.paper,
     },
     notice: {
         margin: spacing.lg,
         padding: spacing.md,
-        backgroundColor: colors.accentLight + "20",
         borderRadius: 8,
         borderLeftWidth: 3,
-        borderLeftColor: colors.accent,
     },
     noticeText: {
         ...typography.bodySmall,
-        color: colors.accentDark,
     },
     listContainer: {
         flex: 1,
     },
     list: {
         paddingHorizontal: spacing.lg,
-        paddingBottom: 100,
+        paddingBottom: 130,
     },
-    empty: {
-        ...typography.body,
-        color: colors.inkLight,
+    emptyContainer: {
+        alignItems: "center",
+        marginTop: spacing.xxxxl,
+        gap: spacing.sm,
+    },
+    emptyTitle: {
+        ...typography.h3,
         textAlign: "center",
-        marginTop: spacing.xxxl,
+    },
+    emptySubtitle: {
+        ...typography.body,
+        textAlign: "center",
     },
     fabRow: {
         position: "absolute",
@@ -126,26 +158,21 @@ const styles = StyleSheet.create({
         width: 56,
         height: 56,
         borderRadius: 28,
-        backgroundColor: colors.white,
         justifyContent: "center",
         alignItems: "center",
         elevation: 4,
-        shadowColor: colors.ink,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
         shadowRadius: 4,
         borderWidth: 1,
-        borderColor: colors.border,
     },
     fab: {
         width: 56,
         height: 56,
         borderRadius: 28,
-        backgroundColor: colors.accent,
         justifyContent: "center",
         alignItems: "center",
         elevation: 4,
-        shadowColor: colors.ink,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
         shadowRadius: 4,

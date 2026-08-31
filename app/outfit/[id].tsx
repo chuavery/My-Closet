@@ -11,7 +11,7 @@ import { useLocalSearchParams, useRouter, useNavigation } from "expo-router";
 import { useOutfitDetail } from "@/viewmodels/useOutfitDetail";
 import { Article } from "@/models/Article";
 import { ArticleCard } from "@/components/ArticleCard";
-import { colors } from "@/theme/colors";
+import { useTheme } from "@/providers/ThemeContext";
 import { typography } from "@/theme/typography";
 import { spacing, borderRadius } from "@/theme/spacing";
 import { Pencil } from "lucide-react-native";
@@ -20,6 +20,7 @@ export default function OutfitDetailScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
     const router = useRouter();
     const navigation = useNavigation();
+    const { colors } = useTheme();
     const {
         outfit,
         articles,
@@ -36,11 +37,11 @@ export default function OutfitDetailScreen() {
                 </Pressable>
             ),
         });
-    }, [navigation, router, id]);
+    }, [navigation, router, id, colors.accent]);
 
     if (loading) {
         return (
-            <View style={styles.center}>
+            <View style={[styles.center, { backgroundColor: colors.background }]}>
                 <ActivityIndicator size="large" color={colors.accent} />
             </View>
         );
@@ -48,18 +49,18 @@ export default function OutfitDetailScreen() {
 
     if (!outfit) {
         return (
-            <View style={styles.center}>
-                <Text style={styles.empty}>Outfit not found</Text>
+            <View style={[styles.center, { backgroundColor: colors.background }]}>
+                <Text style={[styles.empty, { color: colors.inkSecondary }]}>Outfit not found</Text>
             </View>
         );
     }
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: colors.background }]}>
             <View style={styles.header}>
-                <Text style={styles.name}>{outfit.name}</Text>
+                <Text style={[styles.name, { color: colors.inkPrimary }]}>{outfit.name}</Text>
                 {wearHistoryEnabled && (
-                    <Text style={styles.meta}>
+                    <Text style={[styles.meta, { color: colors.inkSecondary }]}>
                         {outfit.wearCount} worn
                         {outfit.lastWornAt
                             ? ` · Last: ${new Date(outfit.lastWornAt).toLocaleDateString()}`
@@ -71,14 +72,14 @@ export default function OutfitDetailScreen() {
             {tags.length > 0 && (
                 <View style={styles.tags}>
                     {tags.map((tag) => (
-                        <View key={tag.id} style={styles.tag}>
-                            <Text style={styles.tagLabel}>{tag.name}</Text>
+                        <View key={tag.id} style={[styles.tag, { backgroundColor: colors.accent + "15" }]}>
+                            <Text style={[styles.tagLabel, { color: colors.accent }]}>{tag.name}</Text>
                         </View>
                     ))}
                 </View>
             )}
 
-            <Text style={styles.sectionTitle}>Articles</Text>
+            <Text style={[styles.sectionTitle, { color: colors.inkPrimary }]}>Articles</Text>
             <FlatList<Article>
                 data={articles}
                 keyExtractor={(item) => item.id}
@@ -93,7 +94,7 @@ export default function OutfitDetailScreen() {
                     />
                 )}
                 ListEmptyComponent={
-                    <Text style={styles.empty}>No articles in this outfit</Text>
+                    <Text style={[styles.empty, { color: colors.inkSecondary }]}>No articles in this outfit</Text>
                 }
             />
         </View>
@@ -103,17 +104,11 @@ export default function OutfitDetailScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.paper,
     },
     center: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: colors.paper,
-    },
-    headerButton: {
-        ...typography.buttonSmall,
-        color: colors.accent,
     },
     header: {
         padding: spacing.lg,
@@ -121,11 +116,9 @@ const styles = StyleSheet.create({
     },
     name: {
         ...typography.h2,
-        color: colors.ink,
     },
     meta: {
         ...typography.bodySmall,
-        color: colors.inkLight,
         marginTop: spacing.xs,
     },
     tags: {
@@ -138,15 +131,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.md,
         paddingVertical: spacing.xs,
         borderRadius: borderRadius.round,
-        backgroundColor: colors.accent + "20",
     },
     tagLabel: {
         ...typography.caption,
-        color: colors.accent,
     },
     sectionTitle: {
         ...typography.h3,
-        color: colors.ink,
         paddingHorizontal: spacing.lg,
         marginTop: spacing.lg,
         marginBottom: spacing.sm,
@@ -163,7 +153,6 @@ const styles = StyleSheet.create({
     },
     empty: {
         ...typography.body,
-        color: colors.inkLight,
         textAlign: "center",
         marginTop: spacing.xxxl,
     },

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { LayerType } from '@/models/OutfitArticle';
-import { colors } from '@/theme/colors';
+import { useTheme } from '@/providers/ThemeContext';
 import { typography } from '@/theme/typography';
 import { spacing, borderRadius } from '@/theme/spacing';
 
@@ -27,22 +27,23 @@ export function LayerSlot({
   onPress,
   onRemove,
 }: LayerSlotProps) {
+  const { colors } = useTheme();
   return (
-    <Pressable style={styles.slot} onPress={onPress}>
+    <Pressable style={[styles.slot, { borderColor: colors.borderDashed, backgroundColor: colors.surface }]} onPress={onPress}>
       <View style={styles.header}>
-        <Text style={styles.layerLabel}>{LAYER_LABELS[layerType]}</Text>
+        <Text style={[styles.layerLabel, { color: colors.inkMuted }]}>{LAYER_LABELS[layerType]}</Text>
         {articleName && onRemove && (
           <Pressable onPress={onRemove} hitSlop={8}>
-            <Text style={styles.remove}>Remove</Text>
+            <Text style={[styles.remove, { color: colors.destructive }]}>Remove</Text>
           </Pressable>
         )}
       </View>
       {articleName ? (
-        <Text style={styles.articleName} numberOfLines={1}>
+        <Text style={[styles.articleName, { color: colors.inkPrimary }]} numberOfLines={1}>
           {articleName}
         </Text>
       ) : (
-        <Text style={styles.empty}>Tap to add</Text>
+        <Text style={[styles.empty, { color: colors.inkMuted }]}>Tap to add</Text>
       )}
     </Pressable>
   );
@@ -53,9 +54,7 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     borderWidth: 1,
     borderStyle: 'dashed',
-    borderColor: colors.borderDashed,
     borderRadius: borderRadius.md,
-    backgroundColor: colors.white,
     marginBottom: spacing.sm,
   },
   header: {
@@ -66,20 +65,16 @@ const styles = StyleSheet.create({
   },
   layerLabel: {
     ...typography.caption,
-    color: colors.inkLight,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   remove: {
     ...typography.buttonSmall,
-    color: colors.error,
   },
   articleName: {
     ...typography.body,
-    color: colors.ink,
   },
   empty: {
     ...typography.body,
-    color: colors.borderDashed,
   },
 });

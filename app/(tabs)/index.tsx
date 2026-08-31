@@ -7,16 +7,27 @@ import {
     StyleSheet,
     ActivityIndicator,
     Pressable,
+    Modal,
+    Dimensions,
 } from "react-native";
 import { useRouter } from "expo-router";
+import Animated, {
+    useSharedValue,
+    useAnimatedStyle,
+    withSpring,
+    runOnJS,
+} from "react-native-reanimated";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { useClosetHome } from "@/viewmodels/useClosetHome";
 import { Article } from "@/models/Article";
 import { ArticleCard } from "@/components/ArticleCard";
 import { FilterChipRow } from "@/components/FilterChipRow";
-import { colors } from "@/theme/colors";
+import { useTheme } from "@/providers/ThemeContext";
 import { typography } from "@/theme/typography";
 import { spacing } from "@/theme/spacing";
-import { Plus, ListFilter } from "lucide-react-native";
+import { Plus, ListFilter, Shirt } from "lucide-react-native";
+
+const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const ARTICLE_TYPES = [
     { label: "All", value: "" },
@@ -50,6 +61,7 @@ const FITS = [
 
 export default function ClosetScreen() {
     const router = useRouter();
+    const { colors } = useTheme();
     const {
         articles,
         searchQuery,
@@ -58,65 +70,101 @@ export default function ClosetScreen() {
         setFilter,
         loading,
     } = useClosetHome();
-    const [filtersExpanded, setFiltersExpanded] = useState(false);
+    const [showFilterSheet, setShowFilterSheet] = useState(false);
 
     const hasActiveFilters = filters.articleType !== null || filters.color !== null || filters.fit !== null;
+    const activeFilterCount = [filters.articleType, filters.color, filters.fit].filter(Boolean).length;
+
+    const sheetY = useSharedValue(SCREEN_HEIGHT);
+    const backdropOpacity = useSharedValue(0);
+
+    const openSheet = () => {
+        sheetY.value = withSpring(0, { damping: 20, stiffness: 200 });
+        backdropOpacity.value = withSpring(1, { damping: 20, stiffness: 200 });
+        setShowFilterSheet(true);
+    };
+
+    const closeSheet = () => {
+        sheetY.value = withSpring(SCREEN_HEIGHT, { damping: 20, stiffness: 200 });
+        backdropOpacity.value = withSpring(0, { damping: 20, stiffness: 200 });
+        runOnJS(setShowFilterSheet)(false);
+    };
+
+    const panGesture = Gesture.Pan()
+        .onUpdate((e) => {
+            if (e.translationY > 0) {
+                sheetY.value = e.translationY;
+                backdropOpacity.value = Math.max(0, 1 - e.translationY / SCREEN_HEIGHT);
+            }
+        })
+        .onEnd((e) => {
+            if (e.translationY > 100 || e.velocityY > 500) {
+                runOnJS(closeSheet)();
+            } else {
+                sheetY.value = withSpring(0, { damping: 20, stiffness: 200 });
+                backdropOpacity.value = withSpring(1, { damping: 20, stiffness: 200 });
+            }
+        });
+
+    const sheetAnimatedStyle = useAnimatedStyle(() => ({
+        transform: [{ translateY: sheetY.value }],
+    }));
+
+    const backdropAnimatedStyle = useAnimatedStyle(() => ({
+        opacity: backdropOpacity.value,
+    }));
 
     if (loading) {
         return (
-            <View style={styles.center}>
+            <View style={[styles.center, { backgroundColor: colors.background }]}>
                 <ActivityIndicator size="large" color={colors.accent} />
             </View>
         );
     }
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: colors.background }]}>
             <View style={styles.searchRow}>
                 <TextInput
-                    style={styles.searchInput}
+                    style={[styles.searchInput, {
+                        backgroundColor: colors.surface,
+                        borderColor: colors.border,
+                        color: colors.inkPrimary,
+                    }]}
                     placeholder="Search articles..."
-                    placeholderTextColor={colors.inkLight}
+                    placeholderTextColor={colors.inkMuted}
                     value={searchQuery}
                     onChangeText={setSearchQuery}
                 />
                 <Pressable
                     style={[
                         styles.filterButton,
-                        (filtersExpanded || hasActiveFilters) && styles.filterButtonActive,
+                        {
+                            borderColor: colors.border,
+                            backgroundColor: colors.surface,
+                        },
+                        (showFilterSheet || hasActiveFilters) && {
+                            backgroundColor: colors.accent,
+                            borderColor: colors.accent,
+                        },
                     ]}
-                    onPress={() => setFiltersExpanded(!filtersExpanded)}
+                    onPress={openSheet}
                 >
                     <ListFilter
                         size={16}
                         color={
-                            (filtersExpanded || hasActiveFilters)
-                                ? colors.white
-                                : colors.ink
+                            (showFilterSheet || hasActiveFilters)
+                                ? colors.surface
+                                : colors.inkPrimary
                         }
                     />
-                    {hasActiveFilters && <View style={styles.filterDot} />}
+                    {activeFilterCount > 0 && (
+                        <View style={[styles.filterBadge, { backgroundColor: colors.destructive }]}>
+                            <Text style={[styles.filterBadgeText, { color: colors.surface }]}>{activeFilterCount}</Text>
+                        </View>
+                    )}
                 </Pressable>
             </View>
-            {filtersExpanded && (
-                <View style={styles.filterSection}>
-                    <FilterChipRow
-                        options={ARTICLE_TYPES}
-                        selectedValue={filters.articleType}
-                        onSelect={(v: string | null) => setFilter("articleType", v)}
-                    />
-                    <FilterChipRow
-                        options={COLORS}
-                        selectedValue={filters.color}
-                        onSelect={(v: string | null) => setFilter("color", v)}
-                    />
-                    <FilterChipRow
-                        options={FITS}
-                        selectedValue={filters.fit}
-                        onSelect={(v: string | null) => setFilter("fit", v)}
-                    />
-                </View>
-            )}
             <FlatList<Article>
                 data={articles}
                 keyExtractor={(item) => item.id}
@@ -131,15 +179,74 @@ export default function ClosetScreen() {
                     />
                 )}
                 ListEmptyComponent={
-                    <Text style={styles.empty}>No articles found</Text>
+                    <View style={styles.emptyContainer}>
+                        <Shirt size={48} color={colors.inkMuted} />
+                        <Text style={[styles.emptyTitle, { color: colors.inkPrimary }]}>No articles yet</Text>
+                        <Text style={[styles.emptySubtitle, { color: colors.inkSecondary }]}>
+                            Tap + to add your first piece
+                        </Text>
+                    </View>
                 }
             />
             <Pressable
-                style={styles.fab}
+                style={[styles.fab, {
+                    backgroundColor: colors.accent,
+                    shadowColor: colors.inkPrimary,
+                }]}
                 onPress={() => router.push("/article/new")}
             >
-                <Plus size={24} color={colors.white} />
+                <Plus size={24} color={colors.surface} />
             </Pressable>
+
+            <Modal transparent visible={showFilterSheet} onRequestClose={closeSheet}>
+                <View style={styles.sheetOverlay}>
+                    <Animated.View style={[styles.sheetBackdrop, backdropAnimatedStyle]}>
+                        <Pressable style={StyleSheet.absoluteFill} onPress={closeSheet} />
+                    </Animated.View>
+                    <GestureDetector gesture={panGesture}>
+                        <Animated.View style={[styles.sheetContent, { backgroundColor: colors.background }, sheetAnimatedStyle]}>
+                            <View style={styles.sheetHandle}>
+                                <View style={[styles.handleBar, { backgroundColor: colors.inkMuted }]} />
+                            </View>
+                            <Text style={[styles.sheetTitle, { color: colors.inkPrimary }]}>Filters</Text>
+
+                            <Text style={[styles.filterCategoryLabel, { color: colors.inkSecondary }]}>TYPE</Text>
+                            <FilterChipRow
+                                options={ARTICLE_TYPES}
+                                selectedValue={filters.articleType}
+                                onSelect={(v: string | null) => setFilter("articleType", v)}
+                            />
+
+                            <Text style={[styles.filterCategoryLabel, { color: colors.inkSecondary }]}>COLOR</Text>
+                            <FilterChipRow
+                                options={COLORS}
+                                selectedValue={filters.color}
+                                onSelect={(v: string | null) => setFilter("color", v)}
+                            />
+
+                            <Text style={[styles.filterCategoryLabel, { color: colors.inkSecondary }]}>FIT</Text>
+                            <FilterChipRow
+                                options={FITS}
+                                selectedValue={filters.fit}
+                                onSelect={(v: string | null) => setFilter("fit", v)}
+                            />
+
+                            {hasActiveFilters && (
+                                <Pressable
+                                    style={[styles.clearButton, { borderColor: colors.destructive }]}
+                                    onPress={() => {
+                                        setFilter("articleType", null);
+                                        setFilter("color", null);
+                                        setFilter("fit", null);
+                                    }}
+                                >
+                                    <Text style={[styles.clearLabel, { color: colors.destructive }]}>Clear All Filters</Text>
+                                </Pressable>
+                            )}
+                        </Animated.View>
+                    </GestureDetector>
+                </View>
+            </Modal>
         </View>
     );
 }
@@ -147,13 +254,11 @@ export default function ClosetScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.paper,
     },
     center: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: colors.paper,
     },
     searchRow: {
         flexDirection: "row",
@@ -165,58 +270,51 @@ const styles = StyleSheet.create({
         ...typography.body,
         flex: 1,
         padding: spacing.sm,
-        backgroundColor: colors.white,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: colors.border,
-        color: colors.ink,
     },
     filterButton: {
         paddingVertical: spacing.sm,
         paddingHorizontal: spacing.md,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: colors.border,
-        backgroundColor: colors.white,
         flexDirection: "row",
         alignItems: "center",
+        gap: spacing.xs,
     },
-    filterButtonActive: {
-        backgroundColor: colors.accent,
-        borderColor: colors.accent,
+    filterBadge: {
+        width: 18,
+        height: 18,
+        borderRadius: 9,
+        justifyContent: "center",
+        alignItems: "center",
     },
-    filterLabel: {
-        ...typography.buttonSmall,
-        color: colors.ink,
-    },
-    filterLabelActive: {
-        color: colors.white,
-    },
-    filterDot: {
-        width: 6,
-        height: 6,
-        borderRadius: 3,
-        backgroundColor: colors.white,
-        marginLeft: spacing.xs,
-    },
-    filterSection: {
-        marginBottom: spacing.sm,
+    filterBadgeText: {
+        fontSize: 10,
+        fontWeight: "700",
     },
     listContainer: {
         flex: 1,
     },
     list: {
         paddingHorizontal: spacing.lg,
-        paddingBottom: 100,
+        paddingBottom: 130,
     },
     row: {
         justifyContent: "space-between",
     },
-    empty: {
-        ...typography.body,
-        color: colors.inkLight,
+    emptyContainer: {
+        alignItems: "center",
+        marginTop: spacing.xxxxl,
+        gap: spacing.sm,
+    },
+    emptyTitle: {
+        ...typography.h3,
         textAlign: "center",
-        marginTop: spacing.xxxl,
+    },
+    emptySubtitle: {
+        ...typography.body,
+        textAlign: "center",
     },
     fab: {
         position: "absolute",
@@ -225,13 +323,58 @@ const styles = StyleSheet.create({
         width: 56,
         height: 56,
         borderRadius: 28,
-        backgroundColor: colors.accent,
         justifyContent: "center",
         alignItems: "center",
         elevation: 4,
-        shadowColor: colors.ink,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
         shadowRadius: 4,
+    },
+    sheetOverlay: {
+        flex: 1,
+        justifyContent: "flex-end",
+    },
+    sheetBackdrop: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: "rgba(0,0,0,0.5)",
+    },
+    sheetContent: {
+        borderTopLeftRadius: 16,
+        borderTopRightRadius: 16,
+        paddingBottom: 40,
+        maxHeight: "70%",
+    },
+    sheetHandle: {
+        alignItems: "center",
+        paddingVertical: spacing.sm,
+    },
+    handleBar: {
+        width: 36,
+        height: 4,
+        borderRadius: 2,
+    },
+    sheetTitle: {
+        ...typography.h3,
+        paddingHorizontal: spacing.lg,
+        marginBottom: spacing.sm,
+    },
+    filterCategoryLabel: {
+        ...typography.caption,
+        textTransform: "uppercase",
+        letterSpacing: 0.5,
+        paddingHorizontal: spacing.lg,
+        marginTop: spacing.md,
+        marginBottom: spacing.xs,
+    },
+    clearButton: {
+        marginHorizontal: spacing.lg,
+        marginTop: spacing.xl,
+        paddingVertical: spacing.sm,
+        borderRadius: 8,
+        borderWidth: 1,
+        alignItems: "center",
+    },
+    clearLabel: {
+        ...typography.button,
     },
 });

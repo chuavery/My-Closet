@@ -1,6 +1,6 @@
 import React from 'react';
 import { ScrollView, Pressable, Text, StyleSheet } from 'react-native';
-import { colors } from '@/theme/colors';
+import { useTheme } from '@/providers/ThemeContext';
 import { typography } from '@/theme/typography';
 import { spacing, borderRadius } from '@/theme/spacing';
 
@@ -15,6 +15,7 @@ export function FilterChipRow({
   selectedValue,
   onSelect,
 }: FilterChipRowProps) {
+  const { colors } = useTheme();
   return (
     <ScrollView
       horizontal
@@ -26,10 +27,14 @@ export function FilterChipRow({
         return (
           <Pressable
             key={option.value}
-            style={[styles.chip, isSelected && styles.chipSelected]}
+            style={[
+              styles.chip,
+              { borderColor: colors.border, backgroundColor: colors.surface },
+              isSelected && { backgroundColor: colors.accent, borderColor: colors.accent },
+            ]}
             onPress={() => onSelect(isSelected ? null : option.value)}
           >
-            <Text style={[styles.label, isSelected && styles.labelSelected]}>
+            <Text style={[styles.label, { color: colors.inkPrimary }, isSelected && { color: colors.surface }]}>
               {option.label}
             </Text>
           </Pressable>
@@ -50,18 +55,8 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
     borderRadius: borderRadius.round,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.white,
-  },
-  chipSelected: {
-    backgroundColor: colors.accent,
-    borderColor: colors.accent,
   },
   label: {
     ...typography.buttonSmall,
-    color: colors.ink,
-  },
-  labelSelected: {
-    color: colors.white,
   },
 });
