@@ -32,7 +32,7 @@ export default function SettingsScreen() {
                     style={[
                         styles.row,
                         {
-                            backgroundColor: colors.white,
+                            backgroundColor: colors.surface,
                             borderColor: colors.border,
                         },
                     ]}
@@ -50,38 +50,38 @@ export default function SettingsScreen() {
                             System Appearance
                         </Text>
                     </View>
-                </View>
-                <View style={styles.themeButtons}>
-                    {THEME_OPTIONS.map((opt) => {
-                        const isActive = settings.themeMode === opt.mode;
-                        const Icon = opt.icon;
-                        return (
-                            <Pressable
-                                key={opt.mode}
-                                style={[
-                                    styles.themeButton,
-                                    {
-                                        backgroundColor: isActive
-                                            ? colors.accent
-                                            : colors.white,
-                                        borderColor: isActive
-                                            ? colors.accent
-                                            : colors.border,
-                                    },
-                                ]}
-                                onPress={() => setThemeMode(opt.mode)}
-                            >
-                                <Icon
-                                    size={20}
-                                    color={
-                                        isActive
-                                            ? colors.surface
-                                            : colors.inkMuted
-                                    }
-                                />
-                            </Pressable>
-                        );
-                    })}
+                    <View style={styles.themeButtons}>
+                        {THEME_OPTIONS.map((opt) => {
+                            const isActive = settings.themeMode === opt.mode;
+                            const Icon = opt.icon;
+                            return (
+                                <Pressable
+                                    key={opt.mode}
+                                    style={[
+                                        styles.themeButton,
+                                        {
+                                            backgroundColor: isActive
+                                                ? colors.accent
+                                                : colors.surfaceAlt,
+                                            borderColor: isActive
+                                                ? colors.accent
+                                                : colors.border,
+                                        },
+                                    ]}
+                                    onPress={() => setThemeMode(opt.mode)}
+                                >
+                                    <Icon
+                                        size={20}
+                                        color={
+                                            isActive
+                                                ? colors.surface
+                                                : colors.inkMuted
+                                        }
+                                    />
+                                </Pressable>
+                            );
+                        })}
+                    </View>
                 </View>
             </View>
             <View style={styles.section}>
@@ -92,7 +92,7 @@ export default function SettingsScreen() {
                     style={[
                         styles.row,
                         {
-                            backgroundColor: colors.white,
+                            backgroundColor: colors.surface,
                             borderColor: colors.border,
                         },
                     ]}
@@ -174,7 +174,6 @@ const styles = StyleSheet.create({
     themeButtons: {
         flexDirection: "row",
         gap: spacing.sm,
-        marginTop: spacing.md,
     },
     themeButton: {
         width: 48,

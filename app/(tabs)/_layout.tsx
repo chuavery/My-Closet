@@ -12,7 +12,7 @@ export default function TabLayout() {
                 headerStyle: { backgroundColor: colors.paper },
                 headerTintColor: colors.ink,
                 tabBarStyle: {
-                    backgroundColor: colors.white,
+                    backgroundColor: colors.surface,
                     borderTopColor: colors.border,
                 },
             }}
