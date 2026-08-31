@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from 'expo-file-system';
+import { Paths, Directory, File } from 'expo-file-system';
 import { Article, ArticleType, Color, Fit, Source } from '@/models/Article';
 import { useRepositories } from '@/providers/RepositoryProvider';
 
@@ -63,14 +63,11 @@ async function pickAndSaveImage(useCamera: boolean): Promise<string | null> {
 
   const asset = result.assets[0];
   const filename = `article_${Date.now()}.jpg`;
-  const dest = `${FileSystem.documentDirectory}articles/${filename}`;
-
-  await FileSystem.makeDirectoryAsync(`${FileSystem.documentDirectory}articles`, {
-    intermediates: true,
-  });
-
-  await FileSystem.copyAsync({ from: asset.uri, to: dest });
-  return dest;
+  const articlesDir = new Directory(Paths.document, 'articles');
+  articlesDir.create({ intermediates: true });
+  const dest = new File(articlesDir, filename);
+  new File(asset.uri).copy(dest);
+  return dest.uri;
 }
 
 export function useArticleForm(articleId?: string) {
