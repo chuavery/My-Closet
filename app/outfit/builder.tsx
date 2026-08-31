@@ -17,6 +17,7 @@ import { FilterChipRow } from "@/components/FilterChipRow";
 import { colors } from "@/theme/colors";
 import { typography } from "@/theme/typography";
 import { spacing, borderRadius } from "@/theme/spacing";
+import { ListFilter } from "lucide-react-native";
 
 const LAYER_TYPES: LayerType[] = [
     "base", "mid", "outer", "bottom", "footwear", "accessory",
@@ -261,14 +262,14 @@ export default function OutfitBuilderScreen() {
                                 ]}
                                 onPress={() => setFiltersExpanded(!filtersExpanded)}
                             >
-                                <Text
-                                    style={[
-                                        styles.pickerFilterLabel,
-                                        (filtersExpanded || hasActiveFilters) && styles.pickerFilterLabelActive,
-                                    ]}
-                                >
-                                    Filters
-                                </Text>
+                                <ListFilter
+                                    size={16}
+                                    color={
+                                        (filtersExpanded || hasActiveFilters)
+                                            ? colors.white
+                                            : colors.ink
+                                    }
+                                />
                                 {hasActiveFilters && <View style={styles.pickerFilterDot} />}
                             </Pressable>
                         </View>

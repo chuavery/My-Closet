@@ -12,6 +12,7 @@ import { useStorageSpaces } from "@/viewmodels/useStorageSpaces";
 import { colors } from "@/theme/colors";
 import { typography } from "@/theme/typography";
 import { spacing, borderRadius } from "@/theme/spacing";
+import { ChevronLeft } from "lucide-react-native";
 
 export default function QRScanScreen() {
     const router = useRouter();
@@ -82,7 +83,7 @@ export default function QRScanScreen() {
             >
                 <View style={styles.overlay}>
                     <Pressable style={styles.backButton} onPress={() => router.back()}>
-                        <Text style={styles.backLabel}>Back</Text>
+                        <ChevronLeft size={24} color={colors.white} />
                     </Pressable>
                     <View style={styles.scanFrame}>
                         <View style={[styles.corner, styles.topLeft]} />
@@ -127,15 +128,6 @@ const styles = StyleSheet.create({
         position: "absolute",
         top: 60,
         left: spacing.lg,
-        backgroundColor: "rgba(0,0,0,0.5)",
-        paddingVertical: spacing.sm,
-        paddingHorizontal: spacing.md,
-        borderRadius: 8,
-    },
-    backLabel: {
-        ...typography.body,
-        color: colors.white,
-        fontWeight: "600",
     },
     scanFrame: {
         width: FRAME_SIZE,

@@ -18,7 +18,7 @@ import { QRTile } from "@/components/QRTile";
 import { colors } from "@/theme/colors";
 import { typography } from "@/theme/typography";
 import { spacing, borderRadius } from "@/theme/spacing";
-import { Plus } from "lucide-react-native";
+import { Plus, Pencil } from "lucide-react-native";
 
 export default function StorageSpaceDetailScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
@@ -62,9 +62,11 @@ export default function StorageSpaceDetailScreen() {
         navigation.setOptions({
             headerRight: () => (
                 <Pressable onPress={() => setEditing(!editing)}>
-                    <Text style={styles.headerButton}>
-                        {editing ? "Cancel" : "Edit"}
-                    </Text>
+                    {editing ? (
+                        <Text style={styles.headerButton}>Cancel</Text>
+                    ) : (
+                        <Pencil size={20} color={colors.accent} />
+                    )}
                 </Pressable>
             ),
         });

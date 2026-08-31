@@ -14,6 +14,7 @@ import { ArticleCard } from "@/components/ArticleCard";
 import { colors } from "@/theme/colors";
 import { typography } from "@/theme/typography";
 import { spacing, borderRadius } from "@/theme/spacing";
+import { Pencil } from "lucide-react-native";
 
 export default function OutfitDetailScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
@@ -31,7 +32,7 @@ export default function OutfitDetailScreen() {
         navigation.setOptions({
             headerRight: () => (
                 <Pressable onPress={() => router.push(`/outfit/builder?id=${id}`)}>
-                    <Text style={styles.headerButton}>Edit</Text>
+                    <Pencil size={20} color={colors.accent} />
                 </Pressable>
             ),
         });

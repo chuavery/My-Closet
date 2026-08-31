@@ -13,7 +13,7 @@ import {
 import { useRouter, useLocalSearchParams, useNavigation } from "expo-router";
 import { useArticleForm } from "@/viewmodels/useArticleForm";
 import { useRepositories } from "@/providers/RepositoryProvider";
-import { Camera, Image as ImageIcon } from "lucide-react-native";
+import { Camera, Image as ImageIcon, Pencil } from "lucide-react-native";
 import { useSettings } from "@/viewmodels/useSettings";
 import { useTheme } from "@/providers/ThemeContext";
 import { ArticleType, Color, Fit } from "@/models/Article";
@@ -75,9 +75,11 @@ export default function ArticleDetailScreen() {
                 if (isNew) return null;
                 return (
                     <Pressable onPress={() => setEditing(!editing)}>
-                        <Text style={styles.headerButton}>
-                            {editing ? "Cancel" : "Edit"}
-                        </Text>
+                        {editing ? (
+                            <Text style={styles.headerButton}>Cancel</Text>
+                        ) : (
+                            <Pencil size={20} color={colors.accent} />
+                        )}
                     </Pressable>
                 );
             },

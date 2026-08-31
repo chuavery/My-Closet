@@ -16,7 +16,7 @@ import { FilterChipRow } from "@/components/FilterChipRow";
 import { colors } from "@/theme/colors";
 import { typography } from "@/theme/typography";
 import { spacing } from "@/theme/spacing";
-import { Plus } from "lucide-react-native";
+import { Plus, ListFilter } from "lucide-react-native";
 
 const ARTICLE_TYPES = [
     { label: "All", value: "" },
@@ -87,14 +87,14 @@ export default function ClosetScreen() {
                     ]}
                     onPress={() => setFiltersExpanded(!filtersExpanded)}
                 >
-                    <Text
-                        style={[
-                            styles.filterLabel,
-                            (filtersExpanded || hasActiveFilters) && styles.filterLabelActive,
-                        ]}
-                    >
-                        Filters
-                    </Text>
+                    <ListFilter
+                        size={16}
+                        color={
+                            (filtersExpanded || hasActiveFilters)
+                                ? colors.white
+                                : colors.ink
+                        }
+                    />
                     {hasActiveFilters && <View style={styles.filterDot} />}
                 </Pressable>
             </View>

@@ -1,10 +1,13 @@
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { RepositoryProvider } from "@/providers/RepositoryProvider";
 import { ThemeProvider, useTheme } from "@/providers/ThemeContext";
 import { StatusBar } from "expo-status-bar";
+import { ChevronLeft } from "lucide-react-native";
+import { Pressable } from "react-native";
 
 function RootLayoutInner() {
     const { colors, isDark } = useTheme();
+    const router = useRouter();
     return (
         <>
             <StatusBar style={isDark ? "light" : "dark"} />
@@ -13,13 +16,15 @@ function RootLayoutInner() {
                     headerStyle: { backgroundColor: colors.paper },
                     headerTintColor: colors.ink,
                     contentStyle: { backgroundColor: colors.paper },
-                    headerBackTitle: "Back",
+                    headerBackButtonDisplayMode: "minimal",
+                    headerLeft: () => (
+                        <Pressable onPress={() => router.back()}>
+                            <ChevronLeft size={24} color={colors.ink} />
+                        </Pressable>
+                    ),
                 }}
             >
-                <Stack.Screen
-                    name="(tabs)"
-                    options={{ headerShown: false }}
-                />
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                 <Stack.Screen
                     name="article/new"
                     options={{ title: "Add Article" }}
@@ -38,7 +43,10 @@ function RootLayoutInner() {
                 />
                 <Stack.Screen
                     name="storage/scan"
-                    options={{ title: "Scan QR Code", presentation: "fullScreenModal" }}
+                    options={{
+                        title: "Scan QR Code",
+                        presentation: "fullScreenModal",
+                    }}
                 />
                 <Stack.Screen
                     name="outfit/builder"
