@@ -22,6 +22,7 @@ import { StorageSpace } from "@/models/StorageSpace";
 import { ARTICLE_COLORS } from "@/theme/colors";
 import { typography } from "@/theme/typography";
 import { spacing, borderRadius } from "@/theme/spacing";
+import { typeTagStyles, fitTagStyles, colorTagStyles } from "@/theme/chipStyles";
 
 const ARTICLE_TYPES: ArticleType[] = [
     "shirt", "jacket", "dress", "pants", "shorts",
@@ -119,29 +120,16 @@ export default function ArticleDetailScreen() {
             )}
 
             <View style={styles.tags}>
-                <View style={[styles.tag, { backgroundColor: colors.accent + "15" }]}>
-                    <Text style={[styles.tagLabel, { color: colors.accent }]}>{capitalize(form.articleType)}</Text>
+                <View style={typeTagStyles(colors).container}>
+                    <Text style={typeTagStyles(colors).label}>{capitalize(form.articleType)}</Text>
                 </View>
-                <View style={[
-                    styles.tag,
-                    {
-                        backgroundColor: form.color === 'white'
-                            ? 'transparent'
-                            : (ARTICLE_COLORS[form.color] ?? colors.accent) + "15",
-                        ...(form.color === 'white' ? { borderWidth: 1, borderColor: colors.border } : {}),
-                    },
-                ]}>
-                    <Text style={[
-                        styles.tagLabel,
-                        {
-                            color: form.color === 'white'
-                                ? colors.inkPrimary
-                                : ARTICLE_COLORS[form.color] ?? colors.accent,
-                        },
-                    ]}>{capitalize(form.color)}</Text>
+                <View style={colorTagStyles(colors, ARTICLE_COLORS[form.color] ?? colors.accent, form.color === 'white', false).container}>
+                    <Text style={colorTagStyles(colors, ARTICLE_COLORS[form.color] ?? colors.accent, form.color === 'white', false).label}>
+                        {capitalize(form.color)}
+                    </Text>
                 </View>
-                <View style={[styles.tag, { backgroundColor: colors.accent + "15" }]}>
-                    <Text style={[styles.tagLabel, { color: colors.accent }]}>{capitalize(form.fit)}</Text>
+                <View style={fitTagStyles(colors).container}>
+                    <Text style={fitTagStyles(colors).label}>{capitalize(form.fit)}</Text>
                 </View>
             </View>
 
@@ -158,6 +146,7 @@ export default function ArticleDetailScreen() {
             <Text style={[styles.label, { color: colors.inkSecondary }]}>Fabric</Text>
             <Text style={[styles.value, { color: colors.inkPrimary }]}>{form.fabricType || "---"}</Text>
 
+            {/* TODO: Wear History — re-enable when wear tracking is turned on
             {settings.wearHistoryEnabled && (
                 <>
                     <Text style={[styles.sectionHeader, { color: colors.inkSecondary }]}>Wear Tracking</Text>
@@ -172,6 +161,7 @@ export default function ArticleDetailScreen() {
                     </Text>
                 </>
             )}
+            */}
 
             <Text style={[styles.sectionHeader, { color: colors.inkSecondary }]}>Location</Text>
             <Text style={[styles.label, { color: colors.inkSecondary }]}>Storage Space</Text>
@@ -346,14 +336,6 @@ const styles = StyleSheet.create({
         flexWrap: "wrap",
         gap: spacing.xs,
         marginTop: spacing.xs,
-    },
-    tag: {
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.xs,
-        borderRadius: borderRadius.round,
-    },
-    tagLabel: {
-        ...typography.caption,
     },
     dropdown: {
         flexDirection: "row",

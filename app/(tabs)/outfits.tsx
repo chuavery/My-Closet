@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
     View,
     Text,
@@ -8,9 +8,10 @@ import {
     Pressable,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { Outfit } from "@/models/Outfit";
-import { useRepositories } from "@/providers/RepositoryProvider";
+import { useOutfitList } from "@/viewmodels/useOutfitList";
+import { OutfitSummary } from "@/models/OutfitSummary";
 import { useTheme } from "@/providers/ThemeContext";
+import { occasionTagStyles } from "@/theme/chipStyles";
 import { typography } from "@/theme/typography";
 import { spacing, borderRadius } from "@/theme/spacing";
 import { Plus, Layers } from "lucide-react-native";
@@ -18,16 +19,7 @@ import { Plus, Layers } from "lucide-react-native";
 export default function OutfitsScreen() {
     const router = useRouter();
     const { colors } = useTheme();
-    const { outfitRepository } = useRepositories();
-    const [outfits, setOutfits] = useState<Outfit[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        outfitRepository.getAll().then((data) => {
-            setOutfits(data);
-            setLoading(false);
-        });
-    }, [outfitRepository]);
+    const { outfits, loading } = useOutfitList();
 
     if (loading) {
         return (
@@ -39,29 +31,36 @@ export default function OutfitsScreen() {
 
     return (
         <View style={[styles.container, { backgroundColor: colors.background }]}>
-            <FlatList<Outfit>
+            <FlatList<OutfitSummary>
                 data={outfits}
-                keyExtractor={(item) => item.id}
+                keyExtractor={(item) => item.outfit.id}
                 style={styles.listContainer}
                 contentContainerStyle={styles.list}
-                renderItem={({ item }) => (
-                    <Pressable
-                        style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
-                        onPress={() => router.push(`/outfit/${item.id}`)}
-                    >
-                        <View style={styles.cardContent}>
-                            <Text style={[styles.name, { color: colors.inkPrimary }]}>{item.name}</Text>
-                            <Text style={[styles.meta, { color: colors.inkSecondary }]}>
-                                {item.wearCount} worn
-                                {item.lastWornAt
-                                    ? ` · Last: ${new Date(
-                                          item.lastWornAt
-                                      ).toLocaleDateString()}`
-                                    : ""}
-                            </Text>
-                        </View>
-                    </Pressable>
-                )}
+                renderItem={({ item }) => {
+                    const tagStyle = occasionTagStyles(colors);
+                    return (
+                        <Pressable
+                            style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
+                            onPress={() => router.push(`/outfit/${item.outfit.id}`)}
+                        >
+                            <View style={styles.cardContent}>
+                                <Text style={[styles.name, { color: colors.inkPrimary }]}>{item.outfit.name}</Text>
+                                {item.tags.length > 0 && (
+                                    <View style={styles.tags}>
+                                        {item.tags.map((tag) => (
+                                            <View key={tag.id} style={tagStyle.container}>
+                                                <Text style={tagStyle.label}>{tag.name}</Text>
+                                            </View>
+                                        ))}
+                                    </View>
+                                )}
+                                <Text style={[styles.meta, { color: colors.inkSecondary }]}>
+                                    {item.articleCount} {item.articleCount === 1 ? "piece" : "pieces"}
+                                </Text>
+                            </View>
+                        </Pressable>
+                    );
+                }}
                 ListEmptyComponent={
                     <View style={styles.emptyContainer}>
                         <Layers size={48} color={colors.inkMuted} />
@@ -110,6 +109,12 @@ const styles = StyleSheet.create({
     cardContent: {},
     name: {
         ...typography.h3,
+    },
+    tags: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: spacing.xs,
+        marginTop: spacing.xs,
     },
     meta: {
         ...typography.bodySmall,

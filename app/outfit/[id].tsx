@@ -14,6 +14,7 @@ import { ArticleCard } from "@/components/ArticleCard";
 import { useTheme } from "@/providers/ThemeContext";
 import { typography } from "@/theme/typography";
 import { spacing, borderRadius } from "@/theme/spacing";
+import { occasionTagStyles } from "@/theme/chipStyles";
 import { Pencil } from "lucide-react-native";
 
 export default function OutfitDetailScreen() {
@@ -59,6 +60,7 @@ export default function OutfitDetailScreen() {
         <View style={[styles.container, { backgroundColor: colors.background }]}>
             <View style={styles.header}>
                 <Text style={[styles.name, { color: colors.inkPrimary }]}>{outfit.name}</Text>
+                {/* TODO: Wear History — re-enable when wear tracking is turned on
                 {wearHistoryEnabled && (
                     <Text style={[styles.meta, { color: colors.inkSecondary }]}>
                         {outfit.wearCount} worn
@@ -67,15 +69,19 @@ export default function OutfitDetailScreen() {
                             : ""}
                     </Text>
                 )}
+                */}
             </View>
 
             {tags.length > 0 && (
                 <View style={styles.tags}>
-                    {tags.map((tag) => (
-                        <View key={tag.id} style={[styles.tag, { backgroundColor: colors.accent + "15" }]}>
-                            <Text style={[styles.tagLabel, { color: colors.accent }]}>{tag.name}</Text>
-                        </View>
-                    ))}
+                    {tags.map((tag) => {
+                        const tagStyle = occasionTagStyles(colors);
+                        return (
+                            <View key={tag.id} style={tagStyle.container}>
+                                <Text style={tagStyle.label}>{tag.name}</Text>
+                            </View>
+                        );
+                    })}
                 </View>
             )}
 
@@ -126,14 +132,6 @@ const styles = StyleSheet.create({
         flexWrap: "wrap",
         paddingHorizontal: spacing.lg,
         gap: spacing.xs,
-    },
-    tag: {
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.xs,
-        borderRadius: borderRadius.round,
-    },
-    tagLabel: {
-        ...typography.caption,
     },
     sectionTitle: {
         ...typography.h3,

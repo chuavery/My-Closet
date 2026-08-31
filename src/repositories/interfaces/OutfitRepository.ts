@@ -10,4 +10,5 @@ export interface OutfitRepository {
   addArticle(outfitId: string, articleId: string, layerType: LayerType, zIndex: number): Promise<OutfitArticle>;
   removeArticle(outfitId: string, articleId: string): Promise<void>;
   getArticlesForOutfit(outfitId: string): Promise<OutfitArticle[]>;
+  getArticleCountsForOutfits(outfitIds: string[]): Promise<Record<string, number>>;
 }

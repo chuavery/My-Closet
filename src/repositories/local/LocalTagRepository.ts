@@ -97,6 +97,31 @@ export class LocalTagRepository implements TagRepository {
     return models.map(mapToTag);
   }
 
+  async getTagsForOutfits(outfitIds: string[]): Promise<Record<string, Tag[]>> {
+    if (outfitIds.length === 0) return {};
+    const links = await this.outfitTags
+      .query(Q.where('outfit_id', Q.oneOf(outfitIds)))
+      .fetch();
+    const allTagIds = [...new Set(links.map((l) => l.tag?.id ?? '').filter(Boolean))];
+    if (allTagIds.length === 0) {
+      const result: Record<string, Tag[]> = {};
+      for (const id of outfitIds) result[id] = [];
+      return result;
+    }
+    const tagModels = await this.collection
+      .query(Q.where('id', Q.oneOf(allTagIds)))
+      .fetch();
+    const tagMap = new Map(tagModels.map((m) => [m.id, mapToTag(m)]));
+    const result: Record<string, Tag[]> = {};
+    for (const id of outfitIds) {
+      const outfitTagIds = links
+        .filter((l) => (l.outfit?.id ?? '') === id)
+        .map((l) => l.tag?.id ?? '');
+      result[id] = outfitTagIds.map((tid) => tagMap.get(tid)).filter(Boolean) as Tag[];
+    }
+    return result;
+  }
+
   async addTagToArticle(articleId: string, tagId: string): Promise<void> {
     await this.articleTags.create((rec) => {
       rec.article.id = articleId;

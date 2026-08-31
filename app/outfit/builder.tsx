@@ -18,6 +18,7 @@ import { FilterChipRow } from "@/components/FilterChipRow";
 import { useTheme } from "@/providers/ThemeContext";
 import { typography } from "@/theme/typography";
 import { spacing, borderRadius } from "@/theme/spacing";
+import { occasionTagStyles } from "@/theme/chipStyles";
 import { ListFilter } from "lucide-react-native";
 
 const LAYER_TYPES: LayerType[] = [
@@ -207,9 +208,10 @@ export default function OutfitBuilderScreen() {
                         {selectedTagIds.map((tagId) => {
                             const tag = allTags.find((t) => t.id === tagId);
                             if (!tag) return null;
+                            const tagStyle = occasionTagStyles(colors);
                             return (
-                                <View key={tagId} style={[styles.selectedTag, { backgroundColor: colors.accent + "15" }]}>
-                                    <Text style={[styles.selectedTagText, { color: colors.accent }]}>{tag.name}</Text>
+                                <View key={tagId} style={[tagStyle.container, styles.selectedTagRow]}>
+                                    <Text style={tagStyle.label}>{tag.name}</Text>
                                     <Pressable
                                         onPress={() => setSelectedTagIds((prev) => prev.filter((id) => id !== tagId))}
                                     >
@@ -457,15 +459,9 @@ const styles = StyleSheet.create({
         gap: spacing.xs,
         marginTop: spacing.sm,
     },
-    selectedTag: {
+    selectedTagRow: {
         flexDirection: "row",
         alignItems: "center",
-        paddingHorizontal: spacing.sm,
-        paddingVertical: spacing.xs,
-        borderRadius: borderRadius.round,
-    },
-    selectedTagText: {
-        ...typography.caption,
     },
     selectedTagRemove: {
         ...typography.caption,

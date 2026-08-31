@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { useColorScheme } from 'react-native';
 import { useRepositories } from '@/providers/RepositoryProvider';
 import { ThemeMode } from '@/models/UserSettings';
@@ -10,22 +10,29 @@ type ThemeColors = typeof lightColors;
 interface ThemeContextValue {
   isDark: boolean;
   colors: ThemeColors;
+  setThemeMode: (mode: ThemeMode) => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
   isDark: false,
   colors: lightColors,
+  setThemeMode: () => {},
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const { settingsRepository } = useRepositories();
   const systemScheme = useColorScheme();
-  const [themeMode, setThemeMode] = useState<ThemeMode>('system');
+  const [themeMode, setThemeModeState] = useState<ThemeMode>('system');
 
   useEffect(() => {
     settingsRepository.get().then((s) => {
-      setThemeMode(s.themeMode);
+      setThemeModeState(s.themeMode);
     });
+  }, [settingsRepository]);
+
+  const setThemeMode = useCallback(async (mode: ThemeMode) => {
+    setThemeModeState(mode);
+    await settingsRepository.update({ themeMode: mode });
   }, [settingsRepository]);
 
   const isDark = useMemo(() => {
@@ -38,8 +45,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     () => ({
       isDark,
       colors: (isDark ? darkColors : lightColors) as ThemeColors,
+      setThemeMode,
     }),
-    [isDark]
+    [isDark, setThemeMode]
   );
 
   return (

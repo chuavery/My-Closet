@@ -8,6 +8,7 @@ export interface TagRepository {
   delete(id: string): Promise<void>;
   getTagsForArticle(articleId: string): Promise<Tag[]>;
   getTagsForOutfit(outfitId: string): Promise<Tag[]>;
+  getTagsForOutfits(outfitIds: string[]): Promise<Record<string, Tag[]>>;
   addTagToArticle(articleId: string, tagId: string): Promise<void>;
   removeTagFromArticle(articleId: string, tagId: string): Promise<void>;
   addTagToOutfit(outfitId: string, tagId: string): Promise<void>;

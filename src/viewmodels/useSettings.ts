@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { UserSettings, ThemeMode } from '@/models/UserSettings';
 import { useRepositories } from '@/providers/RepositoryProvider';
+import { useTheme } from '@/providers/ThemeContext';
 
 export function useSettings() {
   const { settingsRepository } = useRepositories();
+  const { setThemeMode: setGlobalThemeMode } = useTheme();
   const [settings, setSettings] = useState<UserSettings>({
     wearHistoryEnabled: false,
     themeMode: 'system',
@@ -24,9 +26,9 @@ export function useSettings() {
   }, [settings, settingsRepository]);
 
   const setThemeMode = useCallback(async (mode: ThemeMode) => {
-    await settingsRepository.update({ themeMode: mode });
+    await setGlobalThemeMode(mode);
     setSettings((prev) => ({ ...prev, themeMode: mode }));
-  }, [settingsRepository]);
+  }, [setGlobalThemeMode]);
 
   return {
     settings,

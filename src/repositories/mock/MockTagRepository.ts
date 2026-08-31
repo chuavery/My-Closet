@@ -60,6 +60,22 @@ export class MockTagRepository implements TagRepository {
     return tags.filter((t) => tagIds.includes(t.id));
   }
 
+  async getTagsForOutfits(outfitIds: string[]): Promise<Record<string, Tag[]>> {
+    const result: Record<string, Tag[]> = {};
+    const outfitIdSet = new Set(outfitIds);
+    const matchingLinks = outfitTagLinks.filter((l) => outfitIdSet.has(l.outfitId));
+    const allTagIds = [...new Set(matchingLinks.map((l) => l.tagId))];
+    const resolvedTags = tags.filter((t) => allTagIds.includes(t.id));
+    const tagMap = new Map(resolvedTags.map((t) => [t.id, t]));
+    for (const id of outfitIds) {
+      const tagIds = matchingLinks
+        .filter((l) => l.outfitId === id)
+        .map((l) => l.tagId);
+      result[id] = tagIds.map((tid) => tagMap.get(tid)).filter(Boolean) as Tag[];
+    }
+    return result;
+  }
+
   async addTagToArticle(articleId: string, tagId: string): Promise<void> {
     articleTagLinks.push({ articleId, tagId });
   }

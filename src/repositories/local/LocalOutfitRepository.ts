@@ -111,4 +111,22 @@ export class LocalOutfitRepository implements OutfitRepository {
       .fetch();
     return models.map(mapToOutfitArticle);
   }
+
+  async getArticleCountsForOutfits(outfitIds: string[]): Promise<Record<string, number>> {
+    if (outfitIds.length === 0) return {};
+    const models = await this.outfitArticles
+      .query(Q.where('outfit_id', Q.oneOf(outfitIds)))
+      .fetch();
+    const counts: Record<string, number> = {};
+    for (const id of outfitIds) {
+      counts[id] = 0;
+    }
+    for (const model of models) {
+      const outfitId = model.outfit?.id ?? '';
+      if (counts[outfitId] !== undefined) {
+        counts[outfitId]++;
+      }
+    }
+    return counts;
+  }
 }

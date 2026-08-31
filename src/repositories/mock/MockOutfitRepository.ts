@@ -69,4 +69,12 @@ export class MockOutfitRepository implements OutfitRepository {
   async getArticlesForOutfit(outfitId: string): Promise<OutfitArticle[]> {
     return outfitArticles.filter((oa) => oa.outfitId === outfitId);
   }
+
+  async getArticleCountsForOutfits(outfitIds: string[]): Promise<Record<string, number>> {
+    const counts: Record<string, number> = {};
+    for (const id of outfitIds) {
+      counts[id] = outfitArticles.filter((oa) => oa.outfitId === id).length;
+    }
+    return counts;
+  }
 }
