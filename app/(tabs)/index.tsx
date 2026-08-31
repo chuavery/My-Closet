@@ -16,6 +16,7 @@ import { FilterChipRow } from "@/components/FilterChipRow";
 import { colors } from "@/theme/colors";
 import { typography } from "@/theme/typography";
 import { spacing } from "@/theme/spacing";
+import { Plus } from "lucide-react-native";
 
 const ARTICLE_TYPES = [
     { label: "All", value: "" },
@@ -137,7 +138,7 @@ export default function ClosetScreen() {
                 style={styles.fab}
                 onPress={() => router.push("/article/new")}
             >
-                <Text style={styles.fabText}>+</Text>
+                <Plus size={24} color={colors.white} />
             </Pressable>
         </View>
     );
@@ -232,9 +233,5 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
         shadowRadius: 4,
-    },
-    fabText: {
-        ...typography.h2,
-        color: colors.white,
     },
 });

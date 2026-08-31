@@ -13,6 +13,7 @@ import { useRepositories } from "@/providers/RepositoryProvider";
 import { colors } from "@/theme/colors";
 import { typography } from "@/theme/typography";
 import { spacing, borderRadius } from "@/theme/spacing";
+import { Plus } from "lucide-react-native";
 
 export default function OutfitsScreen() {
     const router = useRouter();
@@ -68,7 +69,7 @@ export default function OutfitsScreen() {
                 style={styles.fab}
                 onPress={() => router.push("/outfit/builder")}
             >
-                <Text style={styles.fabText}>+</Text>
+                <Plus size={24} color={colors.white} />
             </Pressable>
         </View>
     );
@@ -131,9 +132,5 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
         shadowRadius: 4,
-    },
-    fabText: {
-        ...typography.h2,
-        color: colors.white,
     },
 });

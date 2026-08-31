@@ -1,6 +1,6 @@
 import { Tabs } from "expo-router";
-import { Text } from "react-native";
 import { useTheme } from "@/providers/ThemeContext";
+import { Shirt, Handbag, ArchiveX, Settings } from "lucide-react-native";
 
 export default function TabLayout() {
     const { colors } = useTheme();
@@ -22,8 +22,8 @@ export default function TabLayout() {
                 options={{
                     title: "Closet",
                     headerTitle: "My Closet",
-                    tabBarIcon: ({ color }: { color: string }) => (
-                        <TabIcon label="衣" color={color} />
+                    tabBarIcon: ({ color, size }) => (
+                        <Shirt size={size} color={color} />
                     ),
                 }}
             />
@@ -32,8 +32,8 @@ export default function TabLayout() {
                 options={{
                     title: "Outfits",
                     headerTitle: "Outfits",
-                    tabBarIcon: ({ color }: { color: string }) => (
-                        <TabIcon label="O" color={color} />
+                    tabBarIcon: ({ color, size }) => (
+                        <Handbag size={size} color={color} />
                     ),
                 }}
             />
@@ -42,8 +42,8 @@ export default function TabLayout() {
                 options={{
                     title: "Storage",
                     headerTitle: "Storage Spaces",
-                    tabBarIcon: ({ color }: { color: string }) => (
-                        <TabIcon label="#" color={color} />
+                    tabBarIcon: ({ color, size }) => (
+                        <ArchiveX size={size} color={color} />
                     ),
                 }}
             />
@@ -52,17 +52,11 @@ export default function TabLayout() {
                 options={{
                     title: "Settings",
                     headerTitle: "Settings",
-                    tabBarIcon: ({ color }: { color: string }) => (
-                        <TabIcon label="*" color={color} />
+                    tabBarIcon: ({ color, size }) => (
+                        <Settings size={size} color={color} />
                     ),
                 }}
             />
         </Tabs>
-    );
-}
-
-function TabIcon({ label, color }: { label: string; color: string }) {
-    return (
-        <Text style={{ fontSize: 18, color, fontWeight: "700" }}>{label}</Text>
     );
 }

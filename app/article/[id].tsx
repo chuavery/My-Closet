@@ -13,6 +13,7 @@ import {
 import { useRouter, useLocalSearchParams, useNavigation } from "expo-router";
 import { useArticleForm } from "@/viewmodels/useArticleForm";
 import { useRepositories } from "@/providers/RepositoryProvider";
+import { Camera, Image as ImageIcon } from "lucide-react-native";
 import { useSettings } from "@/viewmodels/useSettings";
 import { useTheme } from "@/providers/ThemeContext";
 import { ArticleType, Color, Fit } from "@/models/Article";
@@ -118,11 +119,11 @@ export default function ArticleDetailScreen() {
             ) : editing ? (
                 <View style={styles.photoButtons}>
                     <Pressable style={styles.photoButton} onPress={takePhoto}>
-                        <Text style={styles.photoButtonIcon}>📷</Text>
+                        <Camera size={24} color={colors.ink} />
                         <Text style={styles.photoButtonLabel}>Take Photo</Text>
                     </Pressable>
                     <Pressable style={styles.photoButton} onPress={pickImage}>
-                        <Text style={styles.photoButtonIcon}>🖼️</Text>
+                        <ImageIcon size={24} color={colors.ink} />
                         <Text style={styles.photoButtonLabel}>Choose from Library</Text>
                     </Pressable>
                 </View>

@@ -15,6 +15,7 @@ import { StorageSpaceRow } from "@/components/StorageSpaceRow";
 import { colors } from "@/theme/colors";
 import { typography } from "@/theme/typography";
 import { spacing } from "@/theme/spacing";
+import { Plus, Scan } from "lucide-react-native";
 
 export default function StorageScreen() {
     const router = useRouter();
@@ -65,13 +66,13 @@ export default function StorageScreen() {
                     style={styles.scanFab}
                     onPress={() => router.push("/storage/scan")}
                 >
-                    <Text style={styles.fabText}>Scan</Text>
+                    <Scan size={24} color={colors.accent} />
                 </Pressable>
                 <Pressable
                     style={styles.fab}
                     onPress={() => router.push("/storage/new")}
                 >
-                    <Text style={styles.fabText}>+</Text>
+                    <Plus size={24} color={colors.white} />
                 </Pressable>
             </View>
         </View>
@@ -148,9 +149,5 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
         shadowRadius: 4,
-    },
-    fabText: {
-        ...typography.h2,
-        color: colors.ink,
     },
 });

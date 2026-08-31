@@ -18,6 +18,7 @@ import { QRTile } from "@/components/QRTile";
 import { colors } from "@/theme/colors";
 import { typography } from "@/theme/typography";
 import { spacing, borderRadius } from "@/theme/spacing";
+import { Plus } from "lucide-react-native";
 
 export default function StorageSpaceDetailScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
@@ -210,7 +211,7 @@ export default function StorageSpaceDetailScreen() {
 
             {editing && (
                 <Pressable style={styles.fab} onPress={() => setShowPicker(true)}>
-                    <Text style={styles.fabText}>+</Text>
+                    <Plus size={24} color={colors.white} />
                 </Pressable>
             )}
 
@@ -360,10 +361,6 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
         shadowRadius: 4,
-    },
-    fabText: {
-        ...typography.h2,
-        color: colors.white,
     },
     pickerOverlay: {
         position: "absolute",

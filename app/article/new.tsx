@@ -13,6 +13,7 @@ import { useRouter } from "expo-router";
 import { useArticleForm } from "@/viewmodels/useArticleForm";
 import { ArticleType, Color, Fit } from "@/models/Article";
 import { capitalize } from "@/lib/capitalize";
+import { Camera, Image as ImageIcon } from "lucide-react-native";
 import { colors } from "@/theme/colors";
 import { typography } from "@/theme/typography";
 import { spacing, borderRadius } from "@/theme/spacing";
@@ -55,11 +56,11 @@ export default function NewArticleScreen() {
             ) : (
                 <View style={styles.photoButtons}>
                     <Pressable style={styles.photoButton} onPress={takePhoto}>
-                        <Text style={styles.photoButtonIcon}>📷</Text>
+                        <Camera size={24} color={colors.ink} />
                         <Text style={styles.photoButtonLabel}>Take Photo</Text>
                     </Pressable>
                     <Pressable style={styles.photoButton} onPress={pickImage}>
-                        <Text style={styles.photoButtonIcon}>🖼️</Text>
+                        <ImageIcon size={24} color={colors.ink} />
                         <Text style={styles.photoButtonLabel}>Choose from Library</Text>
                     </Pressable>
                 </View>
